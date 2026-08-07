@@ -1,0 +1,476 @@
+package com.example.buckmanager.ui
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.PieChart
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.buckmanager.model.Envelope
+import com.example.buckmanager.ui.components.*
+import com.example.buckmanager.ui.screens.AccountantScreen
+import com.example.buckmanager.ui.screens.DashboardScreen
+import com.example.buckmanager.ui.screens.LoginScreen
+import com.example.buckmanager.ui.screens.OnboardingScreen
+import com.example.buckmanager.ui.screens.TransactionScreen
+import com.example.buckmanager.viewmodel.BuckViewModel
+
+@Composable
+fun BuckApp(viewModel: BuckViewModel = viewModel()) {
+    BuckManagerTheme {
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val navController = rememberNavController()
+        val userEmail by viewModel.userEmail.collectAsState()
+        val hasSeenOnboarding by viewModel.hasSeenOnboarding.collectAsState()
+
+        val startDestination = if (!hasSeenOnboarding) "onboarding" else if (userEmail == null) "login" else "dashboard"
+
+        val backStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = backStackEntry?.destination?.route ?: startDestination
+
+        val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+                if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                    viewModel.loadAllData()
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+
+        // Modal States
+        var showSettings by remember { mutableStateOf(false) }
+
+        var editingEnvelope by remember { mutableStateOf<Envelope?>(null) }
+        var showAddEnvelope by remember { mutableStateOf(false) }
+        var editingHeaderCard by remember { mutableStateOf<String?>(null) }
+        var showFundGoalEditor by remember { mutableStateOf(false) }
+        var showBackgroundEditor by remember { mutableStateOf(false) }
+        var showBillsModal by remember { mutableStateOf(false) }
+        var showStreakRewardModal by remember { mutableStateOf(false) }
+
+        val globalBg by viewModel.globalBackground.collectAsState()
+        val headerCards by viewModel.headerCardsConfig.collectAsState()
+        val fundGoal by viewModel.fundGoal.collectAsState()
+        val envelopes by viewModel.envelopes.collectAsState()
+        val bills by viewModel.recurringBills.collectAsState()
+        val monetization by viewModel.monetization.collectAsState()
+        val notificationEnabled by viewModel.notificationEnabled.collectAsState()
+        val isDarkMode by viewModel.isDarkMode.collectAsState()
+        val isThemeCustomized by viewModel.isThemeCustomized.collectAsState()
+        val userNotice by viewModel.userNotice.collectAsState()
+
+        var displayedNotice by remember { mutableStateOf<String?>(null) }
+        var isNoticeVisible by remember { mutableStateOf(false) }
+
+        LaunchedEffect(userNotice) {
+            if (userNotice != null) {
+                displayedNotice = userNotice
+                kotlinx.coroutines.delay(180) // Premium entrance delay
+                isNoticeVisible = true
+                kotlinx.coroutines.delay(3800)
+                isNoticeVisible = false
+                kotlinx.coroutines.delay(400) // Wait for slide out
+                viewModel.clearUserNotice()
+            } else {
+                isNoticeVisible = false
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            val (rewardEarned, _) = viewModel.checkAndUpdateStreak()
+            if (rewardEarned) {
+                showStreakRewardModal = true
+            }
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Scaffold(
+                bottomBar = {
+                    if (currentRoute in listOf("dashboard", "transactions", "strategy")) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .navigationBarsPadding()
+                                .padding(bottom = 16.dp, start = 24.dp, end = 24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val navBg = if (isDarkMode) Color(0xF10F1117) else Color(0xFAFFFFFF)
+                            val navBorder = if (isDarkMode) GoldAccent.copy(alpha = 0.35f) else Color(0xFFE2E8F0)
+                            val unselectedTint = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF64748B)
+                            val activeTint = if (isDarkMode) GoldAccent else Color(0xFF1D2A96)
+
+                            Surface(
+                                modifier = Modifier
+                                    .height(58.dp)
+                                    .clip(RoundedCornerShape(29.dp))
+                                    .border(
+                                        1.dp,
+                                        navBorder,
+                                        RoundedCornerShape(29.dp)
+                                    ),
+                                color = navBg,
+                                tonalElevation = 0.dp,
+                                shadowElevation = 8.dp
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 24.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Dashboard tab
+                                    IconButton(
+                                        onClick = {
+                                            navController.navigate("dashboard") {
+                                                popUpTo("dashboard") { saveState = true }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = if (currentRoute == "dashboard") Icons.Filled.Home else Icons.Outlined.Home,
+                                            contentDescription = "Dashboard",
+                                            tint = if (currentRoute == "dashboard") activeTint else unselectedTint,
+                                            modifier = Modifier.size(28.dp)
+                                        )
+                                    }
+
+                                    // Transactions tab
+                                    IconButton(
+                                        onClick = {
+                                            navController.navigate("transactions") {
+                                                popUpTo("dashboard") { saveState = true }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = if (currentRoute == "transactions") Icons.Filled.AddCircle else Icons.Outlined.AddCircleOutline,
+                                            contentDescription = "Transactions",
+                                            tint = if (currentRoute == "transactions") activeTint else unselectedTint,
+                                            modifier = Modifier.size(28.dp)
+                                        )
+                                    }
+
+                                    // Strategy tab
+                                    IconButton(
+                                        onClick = {
+                                            navController.navigate("strategy") {
+                                                popUpTo("dashboard") { saveState = true }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = if (currentRoute == "strategy") Icons.Filled.PieChart else Icons.Outlined.PieChart,
+                                            contentDescription = "Strategy",
+                                            tint = if (currentRoute == "strategy") activeTint else unselectedTint,
+                                            modifier = Modifier.size(28.dp)
+                                        )
+                                    }
+
+                                    // Settings tab
+                                    IconButton(onClick = { showSettings = true }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Menu,
+                                            contentDescription = "Settings",
+                                            tint = unselectedTint,
+                                            modifier = Modifier.size(28.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                containerColor = Color.Transparent
+            ) { _ ->
+                NavHost(
+                    navController = navController,
+                    startDestination = startDestination,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    composable("onboarding") {
+                        OnboardingScreen(
+                            isDarkMode = isDarkMode,
+                            onFinish = {
+                                viewModel.completeOnboarding()
+                                navController.navigate(if (userEmail == null) "login" else "dashboard") {
+                                    popUpTo("onboarding") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
+                    composable("login") {
+                        LoginScreen(
+                            isDarkMode = isDarkMode,
+                            onLoginSuccess = { email ->
+                                viewModel.setUserEmail(email)
+                                navController.navigate("dashboard") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            },
+                            onContinueAsGuest = {
+                                viewModel.setUserEmail("guest@buckmanager.local")
+                                navController.navigate("dashboard") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
+
+                    composable("dashboard") {
+                        DashboardScreen(
+                            viewModel = viewModel,
+                            onNavigateToTransactions = { navController.navigate("transactions") },
+                            onOpenSettings = { showSettings = true },
+                            onEditEnvelope = { env -> editingEnvelope = env },
+                            onAddEnvelopeClick = { showAddEnvelope = true },
+                            onEditHeaderCard = { cardKey -> editingHeaderCard = cardKey },
+                            onEditFundGoal = { showFundGoalEditor = true },
+                            onEditBackground = { showBackgroundEditor = true }
+                        )
+                    }
+
+                    composable("transactions") {
+                        TransactionScreen(
+                            viewModel = viewModel,
+                            onOpenSettings = { showSettings = true },
+                            onManageBills = { showBillsModal = true },
+                            onEditFundGoal = { showFundGoalEditor = true }
+                        )
+                    }
+
+                    composable("strategy") {
+                        AccountantScreen(
+                            viewModel = viewModel,
+                            onOpenSettings = { showSettings = true }
+                        )
+                    }
+                }
+            }
+
+            // Modals
+            SettingsModal(
+                visible = showSettings,
+                notificationEnabled = notificationEnabled,
+                userEmail = userEmail,
+                monetization = monetization,
+                isDarkMode = isDarkMode,
+                isThemeCustomized = isThemeCustomized,
+                onDismiss = { showSettings = false },
+                onToggleNotification = { viewModel.toggleNotification(it) },
+                onToggleTheme = { viewModel.toggleThemeMode(it) },
+                onResetCustomization = { viewModel.resetCustomizationToDefaultTheme() },
+                onUnlockCustomization = { viewModel.unlockTemporaryCustomization() },
+                onLoginClick = {
+                    showSettings = false
+                    navController.navigate("login")
+                },
+                onLogoutClick = {
+                    viewModel.setUserEmail(null)
+                    showSettings = false
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onBackupData = { viewModel.backupData() },
+                onRestoreData = { jsonText, onRes -> viewModel.restoreData(jsonText, onRes) },
+                onExportCustomization = { viewModel.exportCustomizationJson() },
+                onImportCustomization = { jsonText, onRes -> viewModel.importCustomizationJson(jsonText, onRes) },
+                onOpenCustomizeWidget = {
+                    showSettings = false
+                },
+                onCreateSnapshot = {
+                    val ctx = context
+                    viewModel.createLocalSnapshot(ctx)
+                    android.widget.Toast.makeText(ctx, "Snapshot created in internal storage", android.widget.Toast.LENGTH_SHORT).show()
+                },
+                onExportJson = { uri ->
+                    viewModel.exportToJson(context, uri)
+                    android.widget.Toast.makeText(context, "Exporting to JSON...", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            )
+
+
+            EnvelopeEditorModal(
+                envelope = editingEnvelope,
+                visible = editingEnvelope != null,
+                hasPremium = viewModel.hasPremium(),
+                isDarkMode = isDarkMode,
+                onDismiss = { editingEnvelope = null },
+                onSave = { updated -> viewModel.updateEnvelope(updated) },
+                onDelete = { id -> viewModel.deleteEnvelope(id) }
+            )
+
+            AddEnvelopeModal(
+                visible = showAddEnvelope,
+                isDarkMode = isDarkMode,
+                onDismiss = { showAddEnvelope = false },
+                onAdd = { env ->
+                    viewModel.addEnvelope(env)
+                }
+            )
+
+            HeaderCardEditorModal(
+                visible = editingHeaderCard != null,
+                cardKey = editingHeaderCard,
+                currentCards = headerCards,
+                isDarkMode = isDarkMode,
+                onDismiss = { editingHeaderCard = null },
+                onSave = { cardKey, newConfig -> viewModel.updateHeaderCard(cardKey, newConfig) }
+            )
+
+            FundGoalEditorModal(
+                visible = showFundGoalEditor,
+                currentConfig = fundGoal,
+                isDarkMode = isDarkMode,
+                onDismiss = { showFundGoalEditor = false },
+                onSave = { updated -> viewModel.updateFundGoal(updated) }
+            )
+
+            BackgroundEditorModal(
+                visible = showBackgroundEditor,
+                currentConfig = globalBg,
+                isDarkMode = isDarkMode,
+                onDismiss = { showBackgroundEditor = false },
+                onSave = { updated -> viewModel.updateBackground(updated) }
+            )
+
+            BillsModal(
+                visible = showBillsModal,
+                bills = bills,
+                envelopes = envelopes,
+                isDarkMode = isDarkMode,
+                onDismiss = { showBillsModal = false },
+                onAddBill = { name, amount, cat, day -> viewModel.addRecurringBill(name, amount, cat, day) },
+                onDeleteBill = { id -> viewModel.deleteRecurringBill(id) }
+            )
+
+            StreakRewardModal(
+                visible = showStreakRewardModal,
+                onDismiss = { showStreakRewardModal = false }
+            )
+
+            // User Notice Floating Banner (Premium Glassmorphic Toast)
+            AnimatedVisibility(
+                visible = isNoticeVisible && !displayedNotice.isNullOrBlank(),
+                enter = slideInVertically(
+                    initialOffsetY = { -it },
+                    animationSpec = tween(450, easing = FastOutSlowInEasing)
+                ) + fadeIn(animationSpec = tween(350)),
+                exit = slideOutVertically(
+                    targetOffsetY = { -it },
+                    animationSpec = tween(400, easing = FastOutSlowInEasing)
+                ) + fadeOut(animationSpec = tween(300)),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .statusBarsPadding()
+                    .padding(top = 16.dp, start = 24.dp, end = 24.dp)
+            ) {
+                val bannerBg = if (isDarkMode) Color(0xF0181C26) else Color(0xF00F172A)
+                Surface(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(24.dp))
+                        .border(
+                            1.dp,
+                            androidx.compose.ui.graphics.Brush.horizontalGradient(
+                                listOf(Color(0xFF10B981), GoldAccent, Color(0xFF10B981))
+                            ),
+                            RoundedCornerShape(24.dp)
+                        )
+                        .clickable { isNoticeVisible = false },
+                    color = bannerBg,
+                    tonalElevation = 8.dp,
+                    shadowElevation = 16.dp
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFF10B981).copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = Color(0xFF34D399),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "SUCCESS",
+                                color = Color(0xFF34D399),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = displayedNotice ?: "",
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        IconButton(
+                            onClick = { isNoticeVisible = false },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close",
+                                tint = Color.White.copy(alpha = 0.6f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

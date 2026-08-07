@@ -1,11 +1,26 @@
-<div align="center">
+# Buck Manager (Android)
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+A native Android personal finance and envelope budgeting application built with Kotlin, Jetpack Compose, Material 3, and Room SQLite database.
 
-  <h1>Built with AI Studio</h2>
+## Features
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+- **Dashboard**:
+  - Total Net Worth calculation with privacy toggle (eye icon).
+  - Income and Expense summary cards.
+  - Interactive Fund Goal progress section.
+  - Budget Envelopes (Needs, Wants, Savings) displaying remaining funds.
+  - Particle animation background effects (Starfall, Lines, or Solid).
+  - Customizable card & canvas theme styling.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+- **Transactions**:
+  - Record Income or Expense transactions with custom categories and descriptions.
+  - Recurring Bills tracking & management.
+  - Complete transaction history list with category badges and deletion support.
 
-</div>
+- **Allocation Strategy**:
+  - Quick strategy presets: Survival Mode (60/10/30), Balanced (50/30/20), Aggressive Saver (40/10/50).
+  - Fine-tune sliders for percentage allocation per envelope.
+  - Validated 100% total strategy gauge.
+
+- **Streak & Pass System**:
+  - Daily login streak tracking (7-day streak rewards 1 Customization Pass).
