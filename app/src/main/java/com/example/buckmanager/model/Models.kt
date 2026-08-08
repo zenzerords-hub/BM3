@@ -41,7 +41,10 @@ data class GlobalBackgroundConfig(
     val backgroundImageUri: String? = null,
     val dimOpacity: Int = 30,
     val particleEffect: String = "none", // "none", "lines", "starfall"
-    val textColorHex: String = "#FFFFFF"
+    val textColorHex: String = "#FFFFFF",
+    val appNameColorHex: String = "#FFFFFF",
+    val titleColorHex: String = "#FFFFFF",
+    val budgetEnvelopesColorHex: String = "#FFFFFF"
 )
 
 @Serializable

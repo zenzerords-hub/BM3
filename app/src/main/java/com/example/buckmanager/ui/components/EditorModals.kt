@@ -473,6 +473,9 @@ fun BackgroundEditorModal(
 
     var selectedBg by remember(currentConfig) { mutableStateOf(currentConfig.backgroundColorHex) }
     var selectedTextColor by remember(currentConfig) { mutableStateOf(currentConfig.textColorHex) }
+    var appNameColorHex by remember(currentConfig) { mutableStateOf(currentConfig.appNameColorHex) }
+    var titleColorHex by remember(currentConfig) { mutableStateOf(currentConfig.titleColorHex) }
+    var budgetEnvelopesColorHex by remember(currentConfig) { mutableStateOf(currentConfig.budgetEnvelopesColorHex) }
     var selectedEffect by remember(currentConfig) { mutableStateOf(currentConfig.particleEffect) }
     var bgUri by remember(currentConfig) { mutableStateOf(currentConfig.backgroundImageUri ?: "") }
     var dimOpacity by remember(currentConfig) { mutableFloatStateOf(currentConfig.dimOpacity.toFloat()) }
@@ -636,11 +639,29 @@ fun BackgroundEditorModal(
                     HorizontalDivider(color = sheetBorder.copy(alpha = 0.3f))
 
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text("Global Text Color", color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF64748B), fontSize = 13.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                        Text("Text Colors", color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF64748B), fontSize = 13.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                         RichColorPicker(
-                            title = "Dashboard Text",
+                            title = "Dashboard Default Text",
                             selectedColorHex = selectedTextColor,
                             onColorSelected = { selectedTextColor = it },
+                            isDarkMode = isDarkMode
+                        )
+                        RichColorPicker(
+                            title = "\"BUCK MANAGER\" App Name",
+                            selectedColorHex = appNameColorHex,
+                            onColorSelected = { appNameColorHex = it },
+                            isDarkMode = isDarkMode
+                        )
+                        RichColorPicker(
+                            title = "\"Dashboard\" Title",
+                            selectedColorHex = titleColorHex,
+                            onColorSelected = { titleColorHex = it },
+                            isDarkMode = isDarkMode
+                        )
+                        RichColorPicker(
+                            title = "\"Budget Envelopes\" Header",
+                            selectedColorHex = budgetEnvelopesColorHex,
+                            onColorSelected = { budgetEnvelopesColorHex = it },
                             isDarkMode = isDarkMode
                         )
                     }
@@ -806,6 +827,10 @@ fun BackgroundEditorModal(
                         onSave(
                             currentConfig.copy(
                                 backgroundColorHex = selectedBg,
+                                textColorHex = selectedTextColor,
+                                appNameColorHex = appNameColorHex,
+                                titleColorHex = titleColorHex,
+                                budgetEnvelopesColorHex = budgetEnvelopesColorHex,
                                 particleEffect = selectedEffect,
                                 backgroundImageUri = bgUri.ifBlank { null },
                                 dimOpacity = dimOpacity.toInt()

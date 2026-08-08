@@ -115,7 +115,9 @@ fun DashboardScreen(
                     onCustomizeClick = onEditBackground,
                     onPremiumClick = { showPremiumModal = true },
                     onToggleHideBalances = { viewModel.toggleHideBalances() },
-                    textColorHex = globalBg.textColorHex
+                    textColorHex = globalBg.textColorHex,
+                    appNameColorHex = globalBg.appNameColorHex,
+                    titleColorHex = globalBg.titleColorHex
                 )
             }
 
@@ -628,9 +630,10 @@ fun DashboardScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val defaultTextColor = if (isDarkMode) Color.White else Color(0xFF121926)
+                    val headerColor = parseHexColor(globalBg.budgetEnvelopesColorHex, parseHexColor(globalBg.textColorHex, defaultTextColor))
                     Text(
                         text = "Budget Envelopes",
-                        color = parseHexColor(globalBg.textColorHex, defaultTextColor),
+                        color = headerColor,
                         fontWeight = FontWeight.Black,
                         fontSize = 20.sp
                     )

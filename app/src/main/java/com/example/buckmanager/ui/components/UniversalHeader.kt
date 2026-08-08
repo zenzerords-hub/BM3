@@ -38,10 +38,13 @@ fun UniversalHeader(
     onCustomizeClick: (() -> Unit)? = null,
     onPremiumClick: () -> Unit = {},
     onToggleHideBalances: () -> Unit = {},
-    textColorHex: String? = null
+    textColorHex: String? = null,
+    appNameColorHex: String? = null,
+    titleColorHex: String? = null
 ) {
     val defaultTextColor = if (isDarkMode) Color.White else Color(0xFF121926)
-    val titleColor = textColorHex?.let { parseHexColor(it, defaultTextColor) } ?: defaultTextColor
+    val appNameColor = appNameColorHex?.let { parseHexColor(it, defaultTextColor) } ?: textColorHex?.let { parseHexColor(it, defaultTextColor) } ?: defaultTextColor
+    val titleDisplayColor = titleColorHex?.let { parseHexColor(it, defaultTextColor) } ?: textColorHex?.let { parseHexColor(it, defaultTextColor) } ?: defaultTextColor
     val buttonBg = if (isDarkMode) Color(0xFF231F33) else Color(0xFFE2E8F0)
     val iconTint = textColorHex?.let { parseHexColor(it, defaultTextColor) } ?: defaultTextColor
 
@@ -74,7 +77,7 @@ fun UniversalHeader(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "BUCK MANAGER",
-                    color = titleColor.copy(alpha = 0.5f),
+                    color = appNameColor.copy(alpha = 0.5f),
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 11.sp,
                     letterSpacing = 1.sp,
@@ -84,7 +87,7 @@ fun UniversalHeader(
                 )
                 Text(
                     text = title,
-                    color = titleColor,
+                    color = titleDisplayColor,
                     fontWeight = FontWeight.Black,
                     fontSize = 24.sp,
                     modifier = Modifier.offset(y = (-4).dp),
