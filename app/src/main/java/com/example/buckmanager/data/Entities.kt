@@ -22,15 +22,3 @@ data class SettingEntity(
     val value: String
 )
 
-@Serializable
-@Entity(tableName = "recurring_bills")
-data class RecurringBillEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val name: String,
-    val amount: Double,
-    val category: String,
-    val dayOfMonth: Int,
-    val isActive: Boolean = true,
-    val lastProcessed: String? = null,
-    val createdAt: String? = null
-)

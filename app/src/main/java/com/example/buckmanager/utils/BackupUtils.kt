@@ -3,7 +3,6 @@ package com.example.buckmanager.utils
 import android.content.Context
 import android.net.Uri
 import com.example.buckmanager.data.AppDatabase
-import com.example.buckmanager.data.RecurringBillEntity
 import com.example.buckmanager.data.SettingEntity
 import com.example.buckmanager.data.TransactionEntity
 import kotlinx.coroutines.Dispatchers
@@ -21,8 +20,7 @@ import java.util.Locale
 @Serializable
 data class BackupData(
     val transactions: List<TransactionEntity>,
-    val settings: List<SettingEntity>,
-    val recurringBills: List<RecurringBillEntity>
+    val settings: List<SettingEntity>
 )
 
 object BackupUtils {
@@ -71,9 +69,8 @@ object BackupUtils {
         try {
             val transactions = db.transactionDao().getAllTransactions()
             val settings = db.settingDao().getAllSettings()
-            val bills = db.recurringBillDao().getAllBills()
 
-            val backupData = BackupData(transactions, settings, bills)
+            val backupData = BackupData(transactions, settings)
             val jsonString = Json { prettyPrint = true }.encodeToString(backupData)
 
             context.contentResolver.openOutputStream(uri)?.use { outputStream ->

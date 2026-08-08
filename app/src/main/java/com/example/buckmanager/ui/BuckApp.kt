@@ -79,14 +79,13 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
         var editingHeaderCard by remember { mutableStateOf<String?>(null) }
         var showFundGoalEditor by remember { mutableStateOf(false) }
         var showBackgroundEditor by remember { mutableStateOf(false) }
-        var showBillsModal by remember { mutableStateOf(false) }
+
         var showStreakRewardModal by remember { mutableStateOf(false) }
 
         val globalBg by viewModel.globalBackground.collectAsState()
         val headerCards by viewModel.headerCardsConfig.collectAsState()
         val fundGoal by viewModel.fundGoal.collectAsState()
         val envelopes by viewModel.envelopes.collectAsState()
-        val bills by viewModel.recurringBills.collectAsState()
         val monetization by viewModel.monetization.collectAsState()
         val notificationEnabled by viewModel.notificationEnabled.collectAsState()
         val isDarkMode by viewModel.isDarkMode.collectAsState()
@@ -274,7 +273,6 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                         TransactionScreen(
                             viewModel = viewModel,
                             onOpenSettings = { showSettings = true },
-                            onManageBills = { showBillsModal = true },
                             onEditFundGoal = { showFundGoalEditor = true }
                         )
                     }
@@ -376,15 +374,6 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                 onSave = { updated -> viewModel.updateBackground(updated) }
             )
 
-            BillsModal(
-                visible = showBillsModal,
-                bills = bills,
-                envelopes = envelopes,
-                isDarkMode = isDarkMode,
-                onDismiss = { showBillsModal = false },
-                onAddBill = { name, amount, cat, day -> viewModel.addRecurringBill(name, amount, cat, day) },
-                onDeleteBill = { id -> viewModel.deleteRecurringBill(id) }
-            )
 
             StreakRewardModal(
                 visible = showStreakRewardModal,

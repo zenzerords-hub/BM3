@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.buckmanager.data.AppDatabase
-import com.example.buckmanager.data.RecurringBillEntity
 import com.example.buckmanager.data.SettingEntity
 import com.example.buckmanager.data.TransactionEntity
 import com.example.buckmanager.model.*
@@ -85,8 +84,6 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
     private val _streakData = MutableStateFlow(StreakData())
     val streakData: StateFlow<StreakData> = _streakData.asStateFlow()
 
-    private val _recurringBills = MutableStateFlow<List<RecurringBillEntity>>(emptyList())
-    val recurringBills: StateFlow<List<RecurringBillEntity>> = _recurringBills.asStateFlow()
 
     private val _isEditLocked = MutableStateFlow(true)
     val isEditLocked: StateFlow<Boolean> = _isEditLocked.asStateFlow()
@@ -153,9 +150,6 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
             val txList = db.transactionDao().getAllTransactions()
             _transactions.value = txList
 
-            // Load recurring bills
-            val bills = db.recurringBillDao().getAllBills()
-            _recurringBills.value = bills
 
             // Load settings
             val settings = db.settingDao().getAllSettings().associate { it.key to it.value }
@@ -557,25 +551,6 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
         return Pair(rewardEarned, newStreak)
     }
 
-    fun addRecurringBill(name: String, amount: Double, category: String, dayOfMonth: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val bill = RecurringBillEntity(
-                name = name,
-                amount = amount,
-                category = category,
-                dayOfMonth = dayOfMonth
-            )
-            db.recurringBillDao().insertBill(bill)
-            _recurringBills.value = db.recurringBillDao().getAllBills()
-        }
-    }
-
-    fun deleteRecurringBill(id: Long) {
-        viewModelScope.launch(Dispatchers.IO) {
-            db.recurringBillDao().deleteBill(id)
-            _recurringBills.value = db.recurringBillDao().getAllBills()
-        }
-    }
 
     fun toggleHideBalances() { _hideBalances.value = !_hideBalances.value }
 
@@ -606,9 +581,6 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
                 BackupTransactionDto(it.type, it.amount, it.category, it.date, it.description)
             },
             envelopes = _envelopes.value,
-            recurringBills = _recurringBills.value.map {
-                BackupRecurringBillDto(it.name, it.amount, it.category, it.dayOfMonth, it.isActive)
-            },
             globalBackground = _globalBackground.value,
             headerCardsConfig = _headerCardsConfig.value,
             fundGoal = _fundGoal.value
@@ -621,9 +593,8 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val payload = json.decodeFromString<BackupPayload>(jsonString)
                 
-                // Clear existing transactions & recurring bills
+                // Clear existing transactions
                 db.transactionDao().getAllTransactions().forEach { db.transactionDao().deleteTransaction(it.id) }
-                db.recurringBillDao().getAllBills().forEach { db.recurringBillDao().deleteBill(it.id) }
 
                 // Insert transactions
                 payload.transactions.forEach { tx ->
@@ -638,18 +609,6 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 }
 
-                // Insert recurring bills
-                payload.recurringBills.forEach { bill ->
-                    db.recurringBillDao().insertBill(
-                        RecurringBillEntity(
-                            name = bill.name,
-                            amount = bill.amount,
-                            category = bill.category,
-                            dayOfMonth = bill.dayOfMonth,
-                            isActive = bill.isActive
-                        )
-                    )
-                }
 
                 // Save configurations
                 if (payload.envelopes.isNotEmpty()) {

@@ -138,22 +138,12 @@ data class BackupTransactionDto(
 )
 
 @Serializable
-data class BackupRecurringBillDto(
-    val name: String,
-    val amount: Double,
-    val category: String,
-    val dayOfMonth: Int,
-    val isActive: Boolean = true
-)
-
-@Serializable
 data class BackupPayload(
     val appName: String = "Buck Manager",
     val exportDate: String = "",
     val userEmail: String? = null,
     val transactions: List<BackupTransactionDto> = emptyList(),
     val envelopes: List<Envelope> = emptyList(),
-    val recurringBills: List<BackupRecurringBillDto> = emptyList(),
     val globalBackground: GlobalBackgroundConfig = GlobalBackgroundConfig(),
     val headerCardsConfig: HeaderCardsConfig = HeaderCardsConfig(),
     val fundGoal: FundGoalConfig = FundGoalConfig()

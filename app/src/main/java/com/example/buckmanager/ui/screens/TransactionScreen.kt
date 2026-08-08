@@ -33,7 +33,7 @@ import com.example.buckmanager.model.formatRp
 fun TransactionScreen(
     viewModel: BuckViewModel,
     onOpenSettings: () -> Unit,
-    onManageBills: () -> Unit,
+
     onEditFundGoal: () -> Unit
 ) {
     val globalBg by viewModel.globalBackground.collectAsState()
@@ -41,7 +41,7 @@ fun TransactionScreen(
     val currencySymbol by viewModel.currencySymbol.collectAsState()
     val isEditLocked by viewModel.isEditLocked.collectAsState()
     val envelopes by viewModel.envelopes.collectAsState()
-    val bills by viewModel.recurringBills.collectAsState()
+
     val streakData by viewModel.streakData.collectAsState()
     val isDarkMode by viewModel.isDarkMode.collectAsState()
 
@@ -243,96 +243,6 @@ fun TransactionScreen(
                 }
             }
 
-            // Recurring Bills Header
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Recurring Bills", color = globalTextColor, fontWeight = FontWeight.Black, fontSize = 20.sp)
-                    TextButton(onClick = onManageBills) {
-                        Text("Manage", color = GoldAccent, fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
-
-            // Recurring Bills Card
-            item {
-                if (bills.isEmpty()) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = cardBg)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(14.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(CircleShape)
-                                    .background(GoldAccent.copy(alpha = 0.15f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(Icons.Default.Receipt, contentDescription = null, tint = GoldAccent, modifier = Modifier.size(20.dp))
-                            }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text("No active recurring bills", color = textPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Text("Set up bills to track monthly expenses", color = textSecondary, fontSize = 11.sp)
-                            }
-                            TextButton(onClick = onManageBills) {
-                                Text("+ Add", color = GoldAccent, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
-                } else {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = cardBg)
-                    ) {
-                        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            bills.take(3).forEachIndexed { index, bill ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(innerBoxBg)
-                                        .padding(12.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(36.dp)
-                                                .clip(CircleShape)
-                                                .background(expenseColor.copy(alpha = 0.15f)),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Icon(Icons.Default.Receipt, contentDescription = null, tint = expenseColor, modifier = Modifier.size(18.dp))
-                                        }
-                                        Spacer(modifier = Modifier.width(12.dp))
-                                        Column {
-                                            Text(bill.name, color = textPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                            Text("Due Day ${bill.dayOfMonth}", color = textSecondary, fontSize = 11.sp)
-                                        }
-                                    }
-                                    Text(
-                                        formatRp(bill.amount),
-                                        color = textPrimary,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 14.sp
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
 
             // Funding Goal Header
             item {

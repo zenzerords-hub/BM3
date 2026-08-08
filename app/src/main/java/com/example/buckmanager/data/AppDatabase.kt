@@ -6,6 +6,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -41,34 +43,24 @@ interface SettingDao {
     suspend fun deleteSetting(key: String)
 }
 
-@Dao
-interface RecurringBillDao {
-    @Query("SELECT * FROM recurring_bills WHERE isActive = 1 ORDER BY dayOfMonth ASC")
-    fun getActiveBillsFlow(): Flow<List<RecurringBillEntity>>
-
-    @Query("SELECT * FROM recurring_bills ORDER BY id DESC")
-    suspend fun getAllBills(): List<RecurringBillEntity>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBill(bill: RecurringBillEntity): Long
-
-    @Query("DELETE FROM recurring_bills WHERE id = :id")
-    suspend fun deleteBill(id: Long)
-}
-
 @Database(
-    entities = [TransactionEntity::class, SettingEntity::class, RecurringBillEntity::class],
-    version = 1,
+    entities = [TransactionEntity::class, SettingEntity::class],
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun transactionDao(): TransactionDao
     abstract fun settingDao(): SettingDao
-    abstract fun recurringBillDao(): RecurringBillDao
 
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
+
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("DROP TABLE IF EXISTS `recurring_bills`")
+            }
+        }
 
         fun getInstance(context: android.content.Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
@@ -76,7 +68,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "buckmanager.db"
-                ).build()
+                )
+                .addMigrations(MIGRATION_1_2)
+                .build()
                 INSTANCE = instance
                 instance
             }
