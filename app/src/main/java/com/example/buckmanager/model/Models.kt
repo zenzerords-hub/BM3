@@ -44,7 +44,7 @@ data class GlobalBackgroundConfig(
     val textColorHex: String = "#000000",
     val appNameColorHex: String = "#000000",
     val titleColorHex: String = "#000000",
-    val budgetEnvelopesColorHex: String = "#000000"
+    val budgetEnvelopesColorHex: String = "#2563EB"
 )
 
 @Serializable

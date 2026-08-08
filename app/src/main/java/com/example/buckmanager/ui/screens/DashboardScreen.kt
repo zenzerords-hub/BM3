@@ -622,20 +622,16 @@ fun DashboardScreen(
                         fontWeight = FontWeight.Black,
                         fontSize = 20.sp
                     )
-                    Surface(
+                    IconButton(
                         onClick = onAddEnvelopeClick,
-                        shape = RoundedCornerShape(16.dp),
-                        color = Color.Transparent,
-                        border = BorderStroke(1.dp, GoldAccent.copy(alpha = 0.5f))
+                        modifier = Modifier.size(32.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.Default.AddCircle, contentDescription = null, tint = GoldAccent, modifier = Modifier.size(14.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Add Envelope", color = GoldAccent, fontWeight = FontWeight.Bold, fontSize = 11.sp)
-                        }
+                        Icon(
+                            imageVector = Icons.Default.AddCircle,
+                            contentDescription = "Add Envelope",
+                            tint = headerColor,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
             }
