@@ -181,20 +181,7 @@ fun DashboardScreen(
                                         fontWeight = FontWeight.Black,
                                         fontSize = 32.sp
                                     )
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    Surface(
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = Color.Black.copy(alpha = 0.2f)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(Color(0xFF34D399)))
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text("No change today", color = Color.White.copy(alpha = 0.8f), fontSize = 10.sp)
-                                        }
-                                    }
+
                                 }
 
                                 // Pencil icon
@@ -203,14 +190,14 @@ fun DashboardScreen(
                                             modifier = Modifier
                                                 .size(32.dp)
                                                 .clip(CircleShape)
-                                                .background(Color.White.copy(alpha = 0.15f))
+                                                .background(Color.White)
                                                 .clickable { onEditHeaderCard("netWorth") },
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.Edit,
                                                 contentDescription = "Edit Card",
-                                                tint = parseHexColor(netCard.labelColorHex, Color.White),
+                                                tint = Color.Black,
                                                 modifier = Modifier.size(16.dp)
                                             )
                                         }
@@ -286,14 +273,14 @@ fun DashboardScreen(
                                                 modifier = Modifier
                                                     .size(24.dp)
                                                     .clip(CircleShape)
-                                                    .background(if (!isDarkMode) Color(0xFFF1F5F9) else Color.White.copy(alpha = 0.15f))
+                                                    .background(Color.White)
                                                     .clickable { onEditHeaderCard("income") },
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Edit,
                                                     contentDescription = "Edit Card",
-                                                    tint = parseHexColor(incCard.labelColorHex, Color.White),
+                                                    tint = Color.Black,
                                                     modifier = Modifier.size(16.dp)
                                                 )
                                             }
@@ -313,8 +300,7 @@ fun DashboardScreen(
                                     fontWeight = FontWeight.Black,
                                     fontSize = 18.sp
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                if (totalIncome == 0.0) Text("No income yet", color = parseHexColor(incCard.labelColorHex, Color(0xFF9CA3AF)).copy(alpha = 0.7f), fontSize = 10.sp)
+
                             }
                         }
                     }
@@ -377,14 +363,14 @@ fun DashboardScreen(
                                                 modifier = Modifier
                                                     .size(24.dp)
                                                     .clip(CircleShape)
-                                                    .background(if (!isDarkMode) Color(0xFFF1F5F9) else Color.White.copy(alpha = 0.15f))
+                                                    .background(Color.White)
                                                     .clickable { onEditHeaderCard("expense") },
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Edit,
                                                     contentDescription = "Edit Card",
-                                                    tint = parseHexColor(expCard.labelColorHex, Color.White),
+                                                    tint = Color.Black,
                                                     modifier = Modifier.size(16.dp)
                                                 )
                                             }
@@ -404,8 +390,7 @@ fun DashboardScreen(
                                     fontWeight = FontWeight.Black,
                                     fontSize = 18.sp
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                if (totalExpense == 0.0) Text("No expense yet", color = parseHexColor(expCard.labelColorHex, Color(0xFF9CA3AF)).copy(alpha = 0.7f), fontSize = 10.sp)
+
                             }
                         }
                     }
@@ -543,14 +528,14 @@ fun DashboardScreen(
                                             modifier = Modifier
                                                 .size(32.dp)
                                                 .clip(CircleShape)
-                                                .background(if (!isDarkMode) Color(0xFFF1F5F9) else Color.White.copy(alpha = 0.15f))
+                                                .background(Color.White)
                                                 .clickable { onEditFundGoal() },
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.Edit,
                                                 contentDescription = "Goal settings",
-                                                tint = labelColor,
+                                                tint = Color.Black,
                                                 modifier = Modifier.size(16.dp)
                                             )
                                         }
