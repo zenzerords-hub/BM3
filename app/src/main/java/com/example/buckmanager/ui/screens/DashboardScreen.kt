@@ -487,29 +487,14 @@ fun DashboardScreen(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    // Circular Percentage
-                                    Box(contentAlignment = Alignment.Center) {
-                                        CircularProgressIndicator(
-                                            progress = { 1f },
-                                            modifier = Modifier.size(42.dp),
-                                            color = labelColor.copy(alpha = 0.2f),
-                                            strokeWidth = 3.dp,
-                                            strokeCap = StrokeCap.Round
-                                        )
-                                        CircularProgressIndicator(
-                                            progress = { progressRatio },
-                                            modifier = Modifier.size(42.dp),
-                                            color = labelColor,
-                                            strokeWidth = 3.dp,
-                                            strokeCap = StrokeCap.Round
-                                        )
-                                        Text(
-                                            text = "$percentageInt%",
-                                            color = valueColor,
-                                            fontWeight = FontWeight.Black,
-                                            fontSize = 12.sp
-                                        )
-                                    }
+                                    // Percentage
+                                    Text(
+                                        text = "$percentageInt%",
+                                        color = valueColor,
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 14.sp,
+                                        modifier = Modifier.padding(end = 4.dp)
+                                    )
 
                                     // Pin Widget to Android Home Screen
                                     Box(
