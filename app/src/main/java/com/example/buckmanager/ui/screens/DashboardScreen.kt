@@ -257,43 +257,45 @@ fun DashboardScreen(
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.Top
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    // Icon in circle
-                                    Box(
-                                        modifier = Modifier.size(32.dp).clip(CircleShape).background(Color(0xFF10B981).copy(alpha = 0.15f)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(Icons.Default.ArrowUpward, contentDescription = null, tint = Color(0xFF10B981), modifier = Modifier.size(16.dp))
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        // Icon in circle
+                                        Box(
+                                            modifier = Modifier.size(28.dp).clip(CircleShape).background(Color(0xFF10B981).copy(alpha = 0.15f)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(Icons.Default.ArrowUpward, contentDescription = null, tint = Color(0xFF10B981), modifier = Modifier.size(16.dp))
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "INCOME",
+                                            color = parseHexColor(incCard.labelColorHex, Color(0xFF9CA3AF)),
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.sp
+                                        )
                                     }
 
                                     // Pencil icon
-                                        if (!isEditLocked && viewModel.hasPremium()) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(24.dp)
-                                                    .clip(CircleShape)
-                                                    .background(Color.White)
-                                                    .clickable { onEditHeaderCard("income") },
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Edit,
-                                                    contentDescription = "Edit Card",
-                                                    tint = Color.Black,
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                            }
+                                    if (!isEditLocked && viewModel.hasPremium()) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .clip(CircleShape)
+                                                .background(Color.White)
+                                                .clickable { onEditHeaderCard("income") },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Edit,
+                                                contentDescription = "Edit Card",
+                                                tint = Color.Black,
+                                                modifier = Modifier.size(14.dp)
+                                            )
                                         }
+                                    }
                                 }
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = "INCOME",
-                                    color = parseHexColor(incCard.labelColorHex, Color(0xFF9CA3AF)),
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 10.sp
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
                                 Text(
                                     text = if (hideBalances) "+" + currencySymbol + "•••••" else "+${formatRp(totalIncome)}",
                                     color = parseHexColor(incCard.valueColorHex, Color(0xFF10B981)),
@@ -347,43 +349,45 @@ fun DashboardScreen(
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.Top
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    // Icon in circle
-                                    Box(
-                                        modifier = Modifier.size(32.dp).clip(CircleShape).background(Color(0xFFEF4444).copy(alpha = 0.15f)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(Icons.Default.ArrowDownward, contentDescription = null, tint = Color(0xFFEF4444), modifier = Modifier.size(16.dp))
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        // Icon in circle
+                                        Box(
+                                            modifier = Modifier.size(28.dp).clip(CircleShape).background(Color(0xFFEF4444).copy(alpha = 0.15f)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(Icons.Default.ArrowDownward, contentDescription = null, tint = Color(0xFFEF4444), modifier = Modifier.size(16.dp))
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "EXPENSE",
+                                            color = parseHexColor(expCard.labelColorHex, Color(0xFF9CA3AF)),
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.sp
+                                        )
                                     }
 
                                     // Pencil icon
-                                        if (!isEditLocked && viewModel.hasPremium()) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(24.dp)
-                                                    .clip(CircleShape)
-                                                    .background(Color.White)
-                                                    .clickable { onEditHeaderCard("expense") },
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Edit,
-                                                    contentDescription = "Edit Card",
-                                                    tint = Color.Black,
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                            }
+                                    if (!isEditLocked && viewModel.hasPremium()) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .clip(CircleShape)
+                                                .background(Color.White)
+                                                .clickable { onEditHeaderCard("expense") },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Edit,
+                                                contentDescription = "Edit Card",
+                                                tint = Color.Black,
+                                                modifier = Modifier.size(14.dp)
+                                            )
                                         }
+                                    }
                                 }
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = "EXPENSE",
-                                    color = parseHexColor(expCard.labelColorHex, Color(0xFF9CA3AF)),
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 10.sp
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
                                 Text(
                                     text = if (hideBalances) "-" + currencySymbol + "•••••" else "-${formatRp(totalExpense)}",
                                     color = parseHexColor(expCard.valueColorHex, Color(0xFFFB7185)),
