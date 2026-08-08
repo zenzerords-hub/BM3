@@ -95,6 +95,8 @@ fun FundGoalEditorModal(
     var labelColor by remember(currentConfig) { mutableStateOf(currentConfig.labelColorHex) }
     var valueColor by remember(currentConfig) { mutableStateOf(currentConfig.valueColorHex) }
     var borderColorHex by remember(currentConfig) { mutableStateOf(currentConfig.borderColorHex) }
+    var btnBgColorHex by remember(currentConfig) { mutableStateOf(currentConfig.btnBgColorHex) }
+    var btnTextColorHex by remember(currentConfig) { mutableStateOf(currentConfig.btnTextColorHex) }
     var bgUri by remember(currentConfig) { mutableStateOf(currentConfig.backgroundImageUri ?: "") }
     var dimOpacity by remember(currentConfig) { mutableFloatStateOf(currentConfig.dimOpacity.toFloat()) }
 
@@ -345,6 +347,24 @@ fun FundGoalEditorModal(
                             onColorSelected = { valueColor = it },
                             isDarkMode = isDarkMode
                         )
+                        RichColorPicker(
+                            title = "Border Color",
+                            selectedColorHex = borderColorHex,
+                            onColorSelected = { borderColorHex = it },
+                            isDarkMode = isDarkMode
+                        )
+                        RichColorPicker(
+                            title = "Button Background Color",
+                            selectedColorHex = btnBgColorHex,
+                            onColorSelected = { btnBgColorHex = it },
+                            isDarkMode = isDarkMode
+                        )
+                        RichColorPicker(
+                            title = "Button Text Color",
+                            selectedColorHex = btnTextColorHex,
+                            onColorSelected = { btnTextColorHex = it },
+                            isDarkMode = isDarkMode
+                        )
                     }
                     2 -> {
                         Text("Corner Radius", color = textColor, fontWeight = FontWeight.Bold)
@@ -541,6 +561,9 @@ fun FundGoalEditorModal(
                         gradColor2 = currentConfig.gradientColors.getOrNull(1) ?: currentConfig.backgroundColorHex
                         labelColor = currentConfig.labelColorHex
                         valueColor = currentConfig.valueColorHex
+                        borderColorHex = currentConfig.borderColorHex
+                        btnBgColorHex = currentConfig.btnBgColorHex
+                        btnTextColorHex = currentConfig.btnTextColorHex
                         bgUri = currentConfig.backgroundImageUri ?: ""
                         dimOpacity = currentConfig.dimOpacity.toFloat()
                     },
@@ -578,7 +601,10 @@ fun FundGoalEditorModal(
                                 gradientColors = if (useGradient) listOf(gradColor1, gradColor2) else emptyList(),
                                 gradientAngle = gradientAngle,
                                 labelColorHex = labelColor,
-                                valueColorHex = valueColor
+                                valueColorHex = valueColor,
+                                borderColorHex = borderColorHex,
+                                btnBgColorHex = btnBgColorHex,
+                                btnTextColorHex = btnTextColorHex
                             )
                         )
                         onDismiss()

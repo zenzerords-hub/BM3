@@ -6,6 +6,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -164,6 +166,33 @@ fun AccountantScreen(
                                 Text("Your plan needs attention", color = textPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp, lineHeight = 20.sp)
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text("Make sure your total allocation equals 100%.", color = textSecondary, fontSize = 13.sp, lineHeight = 18.sp)
+                            }
+                        }
+                    }
+
+                    // Legend
+                    @OptIn(ExperimentalLayoutApi::class)
+                    FlowRow(
+                        modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp).fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val activeEnvelopes = envelopes.filter { it.id != "main" }.sortedBy { it.orderIndex }
+                        if (mainPercent > 0) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = 12.dp)) {
+                                Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(Color(0xFFE2E8F0)))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Unallocated ($mainPercent%)", fontSize = 10.sp, color = textSecondary)
+                            }
+                        }
+                        activeEnvelopes.forEach { env ->
+                            val pct = envelopePercents.value[env.id]?.roundToInt() ?: 0
+                            if (pct > 0) {
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = 12.dp)) {
+                                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(parseHexColor(env.colorHex)))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("${env.name} ($pct%)", fontSize = 10.sp, color = textSecondary)
+                                }
                             }
                         }
                     }

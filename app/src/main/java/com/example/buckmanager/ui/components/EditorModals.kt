@@ -1050,6 +1050,8 @@ fun HeaderCardEditorModal(
                     RichColorPicker(title = "Label Color", selectedColorHex = labelColor, onColorSelected = { labelColor = it }, isDarkMode = isDarkMode)
                     HorizontalDivider(color = sheetBorder.copy(alpha = 0.3f))
                     RichColorPicker(title = "Value Amount Color", selectedColorHex = valueColor, onColorSelected = { valueColor = it }, isDarkMode = isDarkMode)
+                    HorizontalDivider(color = sheetBorder.copy(alpha = 0.3f))
+                    RichColorPicker(title = "Border Color", selectedColorHex = borderColorHex, onColorSelected = { borderColorHex = it }, isDarkMode = isDarkMode)
                 } else if (selectedTab == 1) { // Icon/Data
                     Text("Background Image & Crop", color = if (isDarkMode) Color.White else Color(0xFF0F172A), fontWeight = FontWeight.Bold, fontSize = 12.sp)
                     Row(
@@ -1281,6 +1283,27 @@ fun EnvelopeEditorModal(
     var gradColor1 by remember(envelope) { mutableStateOf(envelope.gradientColors.getOrNull(0) ?: envelope.backgroundColorHex) }
     var gradColor2 by remember(envelope) { mutableStateOf(envelope.gradientColors.getOrNull(1) ?: envelope.backgroundColorHex) }
     var borderColorHex by remember(envelope) { mutableStateOf(envelope.borderColorHex) }
+    var bgUri by remember(envelope) { mutableStateOf(envelope.backgroundImageUri ?: "") }
+    var dimOpacity by remember(envelope) { mutableFloatStateOf(envelope.dimOpacity.toFloat()) }
+
+    var croppingImageUri by remember { mutableStateOf<String?>(null) }
+    val photoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            croppingImageUri = uri.toString()
+        }
+    }
+
+    ImageCropModal(
+        imageUri = croppingImageUri,
+        visible = croppingImageUri != null,
+        onDismiss = { croppingImageUri = null },
+        onCropConfirm = { croppedUri ->
+            bgUri = croppedUri
+            croppingImageUri = null
+        }
+    )
 
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Amount/Icon", "Colors", "Layout")
@@ -1316,17 +1339,39 @@ fun EnvelopeEditorModal(
             }
 
             // Sticky preview
-            Surface(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 16.dp)
-                    .height(80.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = parseHexColor(bgHex, sheetBg),
-                border = BorderStroke(1.dp, parseHexColor(colorHex, Color.Gray))
+                    .height(80.dp)
+                    .customCardStyle(
+                        shape = RoundedCornerShape(radiusTopLeft.dp, radiusTopRight.dp, radiusBottomRight.dp, radiusBottomLeft.dp),
+                        backgroundColor = parseHexColor(bgHex, sheetBg),
+                        useGradient = useGradient,
+                        gradientColors = listOf(parseHexColor(gradColor1), parseHexColor(gradColor2)),
+                        gradientAngle = gradientAngle,
+                        borderTop = borderWidth.dp,
+                        borderRight = borderWidth.dp,
+                        borderBottom = borderWidth.dp,
+                        borderLeft = borderWidth.dp,
+                        borderColor = parseHexColor(borderColorHex, Color.Gray)
+                    )
             ) {
+                if (bgUri.isNotBlank()) {
+                    AsyncImage(
+                        model = bgUri,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.matchParentSize()
+                    )
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(Color.Black.copy(alpha = (dimOpacity / 100f).coerceIn(0f, 0.98f)))
+                    )
+                }
                 Row(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    modifier = Modifier.fillMaxSize().padding(start = paddingLeft.dp, top = paddingTop.dp, end = paddingRight.dp, bottom = paddingBottom.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -1372,16 +1417,33 @@ fun EnvelopeEditorModal(
                             unfocusedTextColor = textColor
                         )
                     )
-                    OutlinedTextField(
-                        value = iconName,
-                        onValueChange = { iconName = it },
-                        label = { Text("Icon Name (e.g. home, car, food)") },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = textColor,
-                            unfocusedTextColor = textColor
-                        )
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Select Icon", color = textColor, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(IconPresets) { icon ->
+                                val isSelected = iconName == icon
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(if (isSelected) GoldAccent.copy(alpha = 0.2f) else if (isDarkMode) Color(0xFF181C26) else Color(0xFFF1F5F9))
+                                        .border(2.dp, if (isSelected) GoldAccent else Color.Transparent, RoundedCornerShape(12.dp))
+                                        .clickable { iconName = icon },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = getIconVector(icon),
+                                        contentDescription = icon,
+                                        tint = if (isSelected) GoldAccent else if (isDarkMode) Color.White else Color(0xFF0F172A),
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
                     Text("Allocation: ${percentage.toInt()}%", color = textColor)
                     Slider(
                         value = percentage,
@@ -1453,6 +1515,107 @@ fun EnvelopeEditorModal(
                             onColorSelected = { valueColorHex = it },
                             isDarkMode = isDarkMode
                         )
+                        HorizontalDivider(color = sheetBorder.copy(alpha = 0.3f))
+                        RichColorPicker(
+                            title = "Border Color",
+                            selectedColorHex = borderColorHex,
+                            onColorSelected = { borderColorHex = it },
+                            isDarkMode = isDarkMode
+                        )
+                        HorizontalDivider(color = sheetBorder.copy(alpha = 0.3f))
+                        
+                        Text("Background Image & Crop", color = textColor, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                                },
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = GoldAccent),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.Image, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Pick Photo", fontSize = 11.sp)
+                            }
+
+                            if (bgUri.isNotBlank()) {
+                                OutlinedButton(
+                                    onClick = { croppingImageUri = bgUri },
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = textColor)
+                                ) {
+                                    Icon(Icons.Default.Crop, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Crop", fontSize = 11.sp)
+                                }
+
+                                IconButton(
+                                    onClick = { bgUri = "" },
+                                    colors = IconButtonDefaults.iconButtonColors(contentColor = Color(0xFFFB7185))
+                                ) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Clear Image")
+                                }
+                            }
+                        }
+
+                        OutlinedTextField(
+                            value = bgUri,
+                            onValueChange = { bgUri = it },
+                            label = { Text("Image URL or Path", color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF64748B)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = GoldAccent,
+                                unfocusedBorderColor = sheetBorder,
+                                focusedContainerColor = sheetBg,
+                                unfocusedContainerColor = sheetBg,
+                                focusedTextColor = textColor,
+                                unfocusedTextColor = textColor
+                            )
+                        )
+
+                        Text("Sample Wallpapers", color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF64748B), fontSize = 11.sp)
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            items(PresetBackgroundImages) { url ->
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .border(
+                                            2.dp,
+                                            if (bgUri == url) GoldAccent else Color.Transparent,
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .clickable { bgUri = url }
+                                ) {
+                                    AsyncImage(
+                                        model = url,
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+                            }
+                        }
+
+                        Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Darken / Dim Level", color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF64748B), fontSize = 11.sp)
+                                Text("${dimOpacity.toInt()}%", color = GoldAccent, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                            }
+                            Slider(
+                                value = dimOpacity,
+                                onValueChange = { dimOpacity = it },
+                                valueRange = 0f..100f,
+                                colors = SliderDefaults.colors(thumbColor = GoldAccent, activeTrackColor = GoldAccent)
+                            )
+                        }
                     } else if (selectedTab == 2) {
                         Text("Corner Radius", color = textColor, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         CompactSlider(label = "Top-L", value = radiusTopLeft.toFloat(), onValueChange = { radiusTopLeft = it.toInt() }, valueRange = 0f..40f, isDarkMode = isDarkMode)
@@ -1520,7 +1683,9 @@ fun EnvelopeEditorModal(
                             paddingLeft = paddingLeft,
                             useGradient = useGradient,
                             gradientColors = if (useGradient) listOf(gradColor1, gradColor2) else emptyList(),
-                            gradientAngle = gradientAngle
+                            gradientAngle = gradientAngle,
+                            backgroundImageUri = bgUri.ifBlank { null },
+                            dimOpacity = dimOpacity.toInt()
                         ))
                         onDismiss()
                     },
@@ -1666,16 +1831,33 @@ fun AddEnvelopeModal(
                             unfocusedTextColor = textColor
                         )
                     )
-                    OutlinedTextField(
-                        value = iconName,
-                        onValueChange = { iconName = it },
-                        label = { Text("Icon Name (e.g. home, car, food)") },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = textColor,
-                            unfocusedTextColor = textColor
-                        )
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Select Icon", color = textColor, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(IconPresets) { icon ->
+                                val isSelected = iconName == icon
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(if (isSelected) GoldAccent.copy(alpha = 0.2f) else if (isDarkMode) Color(0xFF181C26) else Color(0xFFF1F5F9))
+                                        .border(2.dp, if (isSelected) GoldAccent else Color.Transparent, RoundedCornerShape(12.dp))
+                                        .clickable { iconName = icon },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = getIconVector(icon),
+                                        contentDescription = icon,
+                                        tint = if (isSelected) GoldAccent else if (isDarkMode) Color.White else Color(0xFF0F172A),
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
                     Text("Allocation: ${percentage.toInt()}%", color = textColor)
                     Slider(
                         value = percentage,
@@ -1735,13 +1917,20 @@ fun AddEnvelopeModal(
                         onColorSelected = { colorHex = it },
                         isDarkMode = isDarkMode
                     )
-                    HorizontalDivider(color = sheetBorder.copy(alpha = 0.3f))
-                    RichColorPicker(
-                        title = "Value Color",
-                        selectedColorHex = valueColorHex,
-                        onColorSelected = { valueColorHex = it },
-                        isDarkMode = isDarkMode
-                    )
+                        HorizontalDivider(color = sheetBorder.copy(alpha = 0.3f))
+                        RichColorPicker(
+                            title = "Value Color",
+                            selectedColorHex = valueColorHex,
+                            onColorSelected = { valueColorHex = it },
+                            isDarkMode = isDarkMode
+                        )
+                        HorizontalDivider(color = sheetBorder.copy(alpha = 0.3f))
+                        RichColorPicker(
+                            title = "Border Color",
+                            selectedColorHex = borderColorHex,
+                            onColorSelected = { borderColorHex = it },
+                            isDarkMode = isDarkMode
+                        )
                     } else if (selectedTab == 2) {
                     Text("Corner Radius", color = textColor, fontWeight = FontWeight.Bold)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

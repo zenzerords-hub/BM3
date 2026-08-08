@@ -22,14 +22,23 @@ fun cropImageBitmap(
 ): String? {
     try {
         val uri = Uri.parse(imageUri)
-        val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+        val inputStream = if (imageUri.startsWith("http")) {
+            java.net.URL(imageUri).openStream()
+        } else {
+            context.contentResolver.openInputStream(uri)
+        } ?: return null
+        
         val originalBitmap = BitmapFactory.decodeStream(inputStream)
         inputStream.close()
         
         if (originalBitmap == null) return null
 
         // Get Exif rotation
-        val exifInputStream = context.contentResolver.openInputStream(uri)
+        val exifInputStream = if (imageUri.startsWith("http")) {
+            java.net.URL(imageUri).openStream()
+        } else {
+            context.contentResolver.openInputStream(uri)
+        }
         var exifRotation = 0f
         if (exifInputStream != null) {
             val exif = ExifInterface(exifInputStream)

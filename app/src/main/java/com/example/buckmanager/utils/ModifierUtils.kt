@@ -54,8 +54,10 @@ fun Modifier.customCardStyle(
                     SolidColor(backgroundColor)
                 }
 
+                val outline = shape.createOutline(size, layoutDirection, this)
+
                 onDrawBehind {
-                    drawRect(brush = bgBrush)
+                    drawOutline(outline, brush = bgBrush)
 
                     if (!isUniformBorder) {
                         val topPx = borderTop.toPx()
@@ -63,17 +65,59 @@ fun Modifier.customCardStyle(
                         val bottomPx = borderBottom.toPx()
                         val leftPx = borderLeft.toPx()
 
-                        if (topPx > 0) {
-                            drawRect(color = borderColor, topLeft = Offset.Zero, size = Size(size.width, topPx))
-                        }
-                        if (rightPx > 0) {
-                            drawRect(color = borderColor, topLeft = Offset(size.width - rightPx, 0f), size = Size(rightPx, size.height))
-                        }
-                        if (bottomPx > 0) {
-                            drawRect(color = borderColor, topLeft = Offset(0f, size.height - bottomPx), size = Size(size.width, bottomPx))
-                        }
-                        if (leftPx > 0) {
-                            drawRect(color = borderColor, topLeft = Offset.Zero, size = Size(leftPx, size.height))
+                        if (topPx > 0 || rightPx > 0 || bottomPx > 0 || leftPx > 0) {
+                            val innerOutline = if (outline is androidx.compose.ui.graphics.Outline.Rounded) {
+                                val rr = outline.roundRect
+                                androidx.compose.ui.graphics.Outline.Rounded(
+                                    androidx.compose.ui.geometry.RoundRect(
+                                        left = rr.left + leftPx,
+                                        top = rr.top + topPx,
+                                        right = rr.right - rightPx,
+                                        bottom = rr.bottom - bottomPx,
+                                        topLeftCornerRadius = androidx.compose.ui.geometry.CornerRadius(
+                                            maxOf(0f, rr.topLeftCornerRadius.x - leftPx),
+                                            maxOf(0f, rr.topLeftCornerRadius.y - topPx)
+                                        ),
+                                        topRightCornerRadius = androidx.compose.ui.geometry.CornerRadius(
+                                            maxOf(0f, rr.topRightCornerRadius.x - rightPx),
+                                            maxOf(0f, rr.topRightCornerRadius.y - topPx)
+                                        ),
+                                        bottomRightCornerRadius = androidx.compose.ui.geometry.CornerRadius(
+                                            maxOf(0f, rr.bottomRightCornerRadius.x - rightPx),
+                                            maxOf(0f, rr.bottomRightCornerRadius.y - bottomPx)
+                                        ),
+                                        bottomLeftCornerRadius = androidx.compose.ui.geometry.CornerRadius(
+                                            maxOf(0f, rr.bottomLeftCornerRadius.x - leftPx),
+                                            maxOf(0f, rr.bottomLeftCornerRadius.y - bottomPx)
+                                        )
+                                    )
+                                )
+                            } else if (outline is androidx.compose.ui.graphics.Outline.Rectangle) {
+                                val rect = outline.rect
+                                androidx.compose.ui.graphics.Outline.Rectangle(
+                                    androidx.compose.ui.geometry.Rect(
+                                        left = rect.left + leftPx,
+                                        top = rect.top + topPx,
+                                        right = rect.right - rightPx,
+                                        bottom = rect.bottom - bottomPx
+                                    )
+                                )
+                            } else {
+                                null
+                            }
+
+                            if (innerOutline != null) {
+                                val outerPath = androidx.compose.ui.graphics.Path().apply { addOutline(outline) }
+                                val innerPath = androidx.compose.ui.graphics.Path().apply { addOutline(innerOutline) }
+                                val borderPath = androidx.compose.ui.graphics.Path()
+                                borderPath.op(outerPath, innerPath, androidx.compose.ui.graphics.PathOperation.Difference)
+                                drawPath(borderPath, color = borderColor)
+                            } else {
+                                if (topPx > 0) drawRect(color = borderColor, topLeft = Offset.Zero, size = Size(size.width, topPx))
+                                if (rightPx > 0) drawRect(color = borderColor, topLeft = Offset(size.width - rightPx, 0f), size = Size(rightPx, size.height))
+                                if (bottomPx > 0) drawRect(color = borderColor, topLeft = Offset(0f, size.height - bottomPx), size = Size(size.width, bottomPx))
+                                if (leftPx > 0) drawRect(color = borderColor, topLeft = Offset.Zero, size = Size(leftPx, size.height))
+                            }
                         }
                     }
                 }
