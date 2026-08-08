@@ -57,7 +57,7 @@ fun Modifier.customCardStyle(
                 val outline = shape.createOutline(size, layoutDirection, this)
 
                 onDrawBehind {
-                    drawOutline(outline, brush = bgBrush)
+                    drawPath(outline.toPath(), brush = bgBrush)
 
                     if (!isUniformBorder) {
                         val topPx = borderTop.toPx()
@@ -107,8 +107,8 @@ fun Modifier.customCardStyle(
                             }
 
                             if (innerOutline != null) {
-                                val outerPath = androidx.compose.ui.graphics.Path().apply { addOutline(outline) }
-                                val innerPath = androidx.compose.ui.graphics.Path().apply { addOutline(innerOutline) }
+                                val outerPath = outline.toPath()
+                                val innerPath = innerOutline.toPath()
                                 val borderPath = androidx.compose.ui.graphics.Path()
                                 borderPath.op(outerPath, innerPath, androidx.compose.ui.graphics.PathOperation.Difference)
                                 drawPath(borderPath, color = borderColor)
@@ -124,4 +124,12 @@ fun Modifier.customCardStyle(
             }
             .then(if (isUniformBorder) Modifier.border(borderTop, borderColor, shape) else Modifier)
     )
+}
+
+private fun androidx.compose.ui.graphics.Outline.toPath(): androidx.compose.ui.graphics.Path {
+    return when (this) {
+        is androidx.compose.ui.graphics.Outline.Rectangle -> androidx.compose.ui.graphics.Path().apply { addRect(this@toPath.rect) }
+        is androidx.compose.ui.graphics.Outline.Rounded -> androidx.compose.ui.graphics.Path().apply { addRoundRect(this@toPath.roundRect) }
+        is androidx.compose.ui.graphics.Outline.Generic -> this.path
+    }
 }
