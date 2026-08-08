@@ -1214,6 +1214,7 @@ fun HeaderCardEditorModal(
                                 borderRight = borderWidth,
                                 borderBottom = borderWidth,
                                 borderLeft = borderWidth,
+                                borderColorHex = borderColorHex,
                                 elevation = selectedElevation,
                                 paddingTop = paddingTop,
                                 paddingBottom = paddingBottom,
@@ -1408,17 +1409,41 @@ fun EnvelopeEditorModal(
                             }
                         }
                     } else if (selectedTab == 1) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Use Gradient Background", color = textColor, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Switch(
+                                checked = useGradient,
+                                onCheckedChange = { useGradient = it },
+                                colors = SwitchDefaults.colors(checkedThumbColor = GoldAccent, checkedTrackColor = GoldAccent.copy(alpha = 0.5f))
+                            )
+                        }
+                        if (useGradient) {
+                            RichColorPicker(title = "Gradient Color 1", selectedColorHex = gradColor1, onColorSelected = { gradColor1 = it }, isDarkMode = isDarkMode)
+                            RichColorPicker(title = "Gradient Color 2", selectedColorHex = gradColor2, onColorSelected = { gradColor2 = it }, isDarkMode = isDarkMode)
+                            Column {
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text("Gradient Angle", color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF64748B), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    Text("${gradientAngle.toInt()}°", color = GoldAccent, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                                }
+                                Slider(value = gradientAngle, onValueChange = { gradientAngle = it }, valueRange = 0f..360f, colors = SliderDefaults.colors(thumbColor = GoldAccent, activeTrackColor = GoldAccent))
+                            }
+                        } else {
+                            RichColorPicker(
+                                title = "Background Color",
+                                selectedColorHex = bgHex,
+                                onColorSelected = { bgHex = it },
+                                isDarkMode = isDarkMode
+                            )
+                        }
+                        HorizontalDivider(color = sheetBorder.copy(alpha = 0.3f))
                         RichColorPicker(
                             title = "Color",
                             selectedColorHex = colorHex,
                             onColorSelected = { colorHex = it },
-                            isDarkMode = isDarkMode
-                        )
-                        HorizontalDivider(color = sheetBorder.copy(alpha = 0.3f))
-                        RichColorPicker(
-                            title = "Background Color",
-                            selectedColorHex = bgHex,
-                            onColorSelected = { bgHex = it },
                             isDarkMode = isDarkMode
                         )
                         HorizontalDivider(color = sheetBorder.copy(alpha = 0.3f))
@@ -1479,6 +1504,7 @@ fun EnvelopeEditorModal(
                             iconName = iconName,
                             backgroundColorHex = bgHex,
                             valueColorHex = valueColorHex,
+                            borderColorHex = borderColorHex,
                             elevation = selectedElevation,
                             radiusTopLeft = radiusTopLeft,
                             radiusTopRight = radiusTopRight,
@@ -1513,6 +1539,7 @@ fun EnvelopeEditorModal(
 fun AddEnvelopeModal(
     visible: Boolean,
     isDarkMode: Boolean = true,
+    hasPremium: Boolean = false,
     onDismiss: () -> Unit,
     onAdd: (Envelope) -> Unit
 ) {
@@ -1656,7 +1683,26 @@ fun AddEnvelopeModal(
                         valueRange = 0f..100f,
                         steps = 100
                     )
-                } else if (selectedTab == 1) {
+                } else if (selectedTab == 1 || selectedTab == 2) {
+                    if (!hasPremium) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            color = if (isDarkMode) Color(0xFF181C26) else Color(0xFFF1F5F9),
+                            border = BorderStroke(1.dp, GoldAccent.copy(alpha = 0.3f))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(Icons.Default.Lock, contentDescription = null, tint = GoldAccent, modifier = Modifier.size(32.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("Unlock Premium", color = if (isDarkMode) Color.White else Color(0xFF0F172A), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text("Customize colors and layout with Premium.", color = Color(0xFF9CA3AF), fontSize = 12.sp)
+                            }
+                        }
+                    } else if (selectedTab == 1) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -1696,7 +1742,7 @@ fun AddEnvelopeModal(
                         onColorSelected = { valueColorHex = it },
                         isDarkMode = isDarkMode
                     )
-                } else if (selectedTab == 2) {
+                    } else if (selectedTab == 2) {
                     Text("Corner Radius", color = textColor, fontWeight = FontWeight.Bold)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Column(modifier = Modifier.weight(1f)) {

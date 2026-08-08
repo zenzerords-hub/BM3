@@ -344,6 +344,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
             AddEnvelopeModal(
                 visible = showAddEnvelope,
                 isDarkMode = isDarkMode,
+                hasPremium = viewModel.hasPremium(),
                 onDismiss = { showAddEnvelope = false },
                 onAdd = { env ->
                     viewModel.addEnvelope(env)
