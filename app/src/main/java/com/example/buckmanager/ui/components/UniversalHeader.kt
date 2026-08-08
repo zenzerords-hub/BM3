@@ -104,15 +104,15 @@ fun UniversalHeader(
             IconButton(
                 onClick = onToggleHideBalances,
                 modifier = Modifier
-                    .size(38.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .size(46.dp)
+                    .clip(RoundedCornerShape(16.dp))
                     .background(buttonBg)
             ) {
                 Icon(
                     imageVector = if (hideBalances) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                     contentDescription = "Toggle Balance Visibility",
                     tint = if (hideBalances) Color(0xFF9CA3AF) else iconTint,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(24.dp)
                 )
             }
 

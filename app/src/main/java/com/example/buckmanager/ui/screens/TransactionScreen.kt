@@ -76,9 +76,9 @@ fun TransactionScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = AppSpacing.standard), // 16.dp horizontal padding
-            contentPadding = PaddingValues(top = AppSpacing.standard, bottom = 96.dp), // Extra bottom padding
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.standard)
+                .padding(horizontal = 20.dp),
+            contentPadding = PaddingValues(top = AppSpacing.base, bottom = 96.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
                 UniversalHeader(
@@ -96,12 +96,12 @@ fun TransactionScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(AppSpacing.large),
+                    shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(containerColor = cardBg)
                 ) {
                     Column(
-                        modifier = Modifier.padding(AppSpacing.large),
-                        verticalArrangement = Arrangement.spacedBy(AppSpacing.large) // 24.dp between form groups
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         // Type toggle using TabRow style
                         TabRow(
@@ -241,7 +241,6 @@ fun TransactionScreen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(AppSpacing.base)) // 8.dp + 16.dp arrangement = 24.dp total
             }
 
             // Recurring Bills Header
@@ -263,17 +262,25 @@ fun TransactionScreen(
                 if (bills.isEmpty()) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp),
+                        shape = RoundedCornerShape(20.dp),
                         colors = CardDefaults.cardColors(containerColor = cardBg)
                     ) {
                         Row(
-                            modifier = Modifier.padding(16.dp),
+                            modifier = Modifier.padding(14.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Default.Receipt, contentDescription = null, tint = textSecondary)
-                            Spacer(modifier = Modifier.width(16.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(GoldAccent.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Receipt, contentDescription = null, tint = GoldAccent, modifier = Modifier.size(20.dp))
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("No active recurring bills", color = textPrimary, fontWeight = FontWeight.Bold)
+                                Text("No active recurring bills", color = textPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                                 Text("Set up bills to track monthly expenses", color = textSecondary, fontSize = 11.sp)
                             }
                             TextButton(onClick = onManageBills) {
@@ -284,21 +291,35 @@ fun TransactionScreen(
                 } else {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp),
+                        shape = RoundedCornerShape(20.dp),
                         colors = CardDefaults.cardColors(containerColor = cardBg)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            bills.take(3).forEach { bill ->
+                        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            bills.take(3).forEachIndexed { index, bill ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 8.dp),
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(innerBoxBg)
+                                        .padding(12.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Column {
-                                        Text(bill.name, color = textPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                        Text("Due Day ${bill.dayOfMonth}", color = textSecondary, fontSize = 11.sp)
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .clip(CircleShape)
+                                                .background(expenseColor.copy(alpha = 0.15f)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(Icons.Default.Receipt, contentDescription = null, tint = expenseColor, modifier = Modifier.size(18.dp))
+                                        }
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Column {
+                                            Text(bill.name, color = textPrimary, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                            Text("Due Day ${bill.dayOfMonth}", color = textSecondary, fontSize = 11.sp)
+                                        }
                                     }
                                     Text(
                                         formatRp(bill.amount),
@@ -329,6 +350,7 @@ fun TransactionScreen(
             
             item {
                 val goalConfig by viewModel.fundGoal.collectAsState()
+                val goalLabelColor = parseHexColor(goalConfig.labelColorHex, GoldAccent)
                 Card(
                     modifier = Modifier.fillMaxWidth().clickable { onEditFundGoal() },
                     shape = RoundedCornerShape(goalConfig.radiusTopLeft.dp, goalConfig.radiusTopRight.dp, goalConfig.radiusBottomRight.dp, goalConfig.radiusBottomLeft.dp),
@@ -337,21 +359,35 @@ fun TransactionScreen(
                     )
                 ) {
                     Row(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.Savings, contentDescription = null, tint = parseHexColor(goalConfig.labelColorHex, GoldAccent))
-                        Spacer(modifier = Modifier.width(16.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(goalLabelColor.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.Savings, contentDescription = null, tint = goalLabelColor, modifier = Modifier.size(20.dp))
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(goalConfig.name, color = parseHexColor(goalConfig.valueColorHex, Color.White), fontWeight = FontWeight.Bold)
+                            Text(goalConfig.name, color = parseHexColor(goalConfig.valueColorHex, Color.White), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                             if (goalConfig.targetAmount > 0) {
                                 Text(
                                     "Target: ${formatRp(goalConfig.targetAmount)}",
-                                    color = parseHexColor(goalConfig.labelColorHex, GoldAccent),
+                                    color = goalLabelColor,
                                     fontSize = 11.sp
                                 )
                             }
                         }
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = Color(0xFF9CA3AF),
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
             }
@@ -360,10 +396,9 @@ fun TransactionScreen(
             item {
                 Text(
                     "Transaction History",
-                    color = textPrimary,
+                    color = globalTextColor,
                     fontWeight = FontWeight.Black,
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(top = 8.dp)
+                    fontSize = 20.sp
                 )
             }
 
@@ -373,9 +408,9 @@ fun TransactionScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(20.dp))
                             .background(cardBg)
-                            .padding(24.dp),
+                            .padding(20.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text("No transactions recorded yet.", color = textSecondary, fontWeight = FontWeight.Medium)
@@ -388,53 +423,49 @@ fun TransactionScreen(
 
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(20.dp),
                         colors = CardDefaults.cardColors(containerColor = cardBg)
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
+                                .padding(14.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .clip(CircleShape)
-                                        .background(catColor.copy(alpha = 0.2f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = if (tx.type == "income") Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
-                                        contentDescription = null,
-                                        tint = catColor,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Column {
-                                    Text(
-                                        tx.description,
-                                        color = textPrimary,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 15.sp
-                                    )
-                                    Text(
-                                        text = if (tx.type == "income") "Income" else (env?.name ?: "Expense"),
-                                        color = textSecondary,
-                                        fontSize = 12.sp
-                                    )
-                                }
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(catColor.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (tx.type == "income") Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
+                                    contentDescription = null,
+                                    tint = catColor,
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
-
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    tx.description,
+                                    color = textPrimary,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp
+                                )
+                                Text(
+                                    text = if (tx.type == "income") "Income" else (env?.name ?: "Expense"),
+                                    color = textSecondary,
+                                    fontSize = 11.sp
+                                )
+                            }
                             Column(horizontalAlignment = Alignment.End) {
                                 Text(
                                     text = "${if (tx.type == "income") "+" else "-"}${formatRp(tx.amount)}",
                                     color = if (tx.type == "income") incomeColor else textPrimary,
                                     fontWeight = FontWeight.Black,
-                                    fontSize = 15.sp
+                                    fontSize = 14.sp
                                 )
                                 IconButton(
                                     onClick = { transactionToDelete = tx.id },
@@ -444,7 +475,7 @@ fun TransactionScreen(
                                         imageVector = Icons.Default.Delete,
                                         contentDescription = "Delete",
                                         tint = textSecondary,
-                                        modifier = Modifier.size(16.dp)
+                                        modifier = Modifier.size(14.dp)
                                     )
                                 }
                             }

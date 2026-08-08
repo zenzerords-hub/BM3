@@ -750,17 +750,6 @@ fun DashboardScreen(
                                 )
                             }
 
-                            // Pencil icon when customization unlocked
-                            if (!isEditLocked && viewModel.hasPremium()) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "Edit Envelope",
-                                    tint = parseHexColor(env.colorHex),
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                            }
-
                             Icon(
                                 imageVector = Icons.Default.ChevronRight,
                                 contentDescription = null,
