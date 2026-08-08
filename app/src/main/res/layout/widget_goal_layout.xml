@@ -85,8 +85,7 @@
                 android:layout_marginTop="16dp"
                 android:max="100"
                 android:progress="0"
-                android:progressTint="#D4A54A"
-                android:progressBackgroundTint="#40808080" />
+                android:progressDrawable="@drawable/widget_progress_horizontal" />
         </LinearLayout>
 
     </RelativeLayout>

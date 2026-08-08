@@ -236,9 +236,18 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getEnvelopeStats(envelopeId: String): EnvelopeStats {
         val env = _envelopes.value.find { it.id == envelopeId } ?: return EnvelopeStats()
+        
+        // Pool is Total Income minus any "Unallocated" (main) expenses like Goal deposits.
+        // This prevents double-deduction when a user makes an expense from a specific envelope.
         val totalIncome = getTotalIncome()
-        val allocated = totalIncome * (env.percentage / 100.0)
-        val spent = _transactions.value.filter { it.type == "expense" && it.category == envelopeId }.sumOf { it.amount }
+        val unallocatedExpenses = _transactions.value.filter { it.type == "expense" && it.category == "main" }.sumOf { it.amount }
+        val pool = (totalIncome - unallocatedExpenses).coerceAtLeast(0.0)
+        
+        val allocated = pool * (env.percentage / 100.0)
+        
+        // Main expenses already reduced the pool, so they are not counted as 'spent' against its own percentage
+        val spent = if (envelopeId == "main") 0.0 else _transactions.value.filter { it.type == "expense" && it.category == envelopeId }.sumOf { it.amount }
+        
         return EnvelopeStats(allocated = allocated, spent = spent, remaining = allocated - spent)
     }
 
