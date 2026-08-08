@@ -305,11 +305,11 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
         if (isDark) {
             val bg = GlobalBackgroundConfig(backgroundColorHex = "#0F1117", textColorHex = "#FFFFFF", appNameColorHex = "#FFFFFF", titleColorHex = "#FFFFFF", budgetEnvelopesColorHex = "#FFFFFF")
             val hc = HeaderCardsConfig(
-                netWorth = HeaderCardConfig(backgroundColorHex = "#181C26", radiusTopLeft = 28, radiusTopRight = 28, radiusBottomRight = 28, radiusBottomLeft = 28, labelColorHex = "#F5B041", valueColorHex = "#FFFFFF", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1),
+                netWorth = HeaderCardConfig(backgroundColorHex = "#181C26", radiusTopLeft = 28, radiusTopRight = 28, radiusBottomRight = 28, radiusBottomLeft = 28, labelColorHex = "#FFFFFF", valueColorHex = "#FFFFFF", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1),
                 income = HeaderCardConfig(backgroundColorHex = "#132A22", radiusTopLeft = 20, radiusTopRight = 20, radiusBottomRight = 20, radiusBottomLeft = 20, labelColorHex = "#9CA3AF", valueColorHex = "#34D399", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1),
                 expense = HeaderCardConfig(backgroundColorHex = "#2E1A24", radiusTopLeft = 20, radiusTopRight = 20, radiusBottomRight = 20, radiusBottomLeft = 20, labelColorHex = "#9CA3AF", valueColorHex = "#FB7185", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1)
             )
-            val fg = _fundGoal.value.copy(backgroundColorHex = "#181C26", labelColorHex = "#F5B041", valueColorHex = "#FFFFFF", borderColorHex = "#38BDF8")
+            val fg = _fundGoal.value.copy(backgroundColorHex = "#181C26", labelColorHex = "#2563EB", valueColorHex = "#FFFFFF", borderColorHex = "#38BDF8", btnBgColorHex = "#2563EB", btnTextColorHex = "#FFFFFF")
             
             val envs = _envelopes.value.map { env ->
                 when(env.id) {
@@ -333,11 +333,11 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             val bg = GlobalBackgroundConfig(backgroundColorHex = "#F0F4FA", textColorHex = "#0F172A", appNameColorHex = "#000000", titleColorHex = "#000000", budgetEnvelopesColorHex = "#000000")
             val hc = HeaderCardsConfig(
-                netWorth = HeaderCardConfig(backgroundColorHex = "#1D2A96", radiusTopLeft = 28, radiusTopRight = 28, radiusBottomRight = 28, radiusBottomLeft = 28, labelColorHex = "#FFB300", valueColorHex = "#FFFFFF", borderTop = 0, borderRight = 0, borderBottom = 0, borderLeft = 0),
+                netWorth = HeaderCardConfig(backgroundColorHex = "#2563EB", radiusTopLeft = 28, radiusTopRight = 28, radiusBottomRight = 28, radiusBottomLeft = 28, labelColorHex = "#FFFFFF", valueColorHex = "#FFFFFF", borderTop = 0, borderRight = 0, borderBottom = 0, borderLeft = 0),
                 income = HeaderCardConfig(backgroundColorHex = "#ECFDF5", radiusTopLeft = 20, radiusTopRight = 20, radiusBottomRight = 20, radiusBottomLeft = 20, labelColorHex = "#047857", valueColorHex = "#059669", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1),
                 expense = HeaderCardConfig(backgroundColorHex = "#FCE4EC", radiusTopLeft = 20, radiusTopRight = 20, radiusBottomRight = 20, radiusBottomLeft = 20, labelColorHex = "#C2185B", valueColorHex = "#EC407A", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1)
             )
-            val fg = _fundGoal.value.copy(backgroundColorHex = "#FFFFFF", labelColorHex = "#1D2A96", valueColorHex = "#0F172A", borderColorHex = "#2563EB")
+            val fg = _fundGoal.value.copy(backgroundColorHex = "#FFFFFF", labelColorHex = "#2563EB", valueColorHex = "#0F172A", borderColorHex = "#2563EB", btnBgColorHex = "#2563EB", btnTextColorHex = "#FFFFFF")
             
             val envs = _envelopes.value.map { env ->
                 when(env.id) {

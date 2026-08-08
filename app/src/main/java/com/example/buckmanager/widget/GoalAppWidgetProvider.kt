@@ -135,8 +135,8 @@ class GoalAppWidgetProvider : AppWidgetProvider() {
                 val fundGoal = getGoalFromPrefs(context)
                 val views = RemoteViews(context.packageName, R.layout.widget_goal_layout)
 
-                val name = fundGoal.name.ifBlank { "🎯 Target Savings" }
-                views.setTextViewText(R.id.widget_title, if (name.startsWith("🎯")) name else "🎯 $name")
+                val name = fundGoal.name.ifBlank { "Target Savings" }
+                views.setTextViewText(R.id.widget_title, name)
                 views.setTextViewText(R.id.widget_current_amount, formatRp(fundGoal.currentAmount))
                 views.setTextViewText(R.id.widget_target_amount, "Target: ${formatRp(fundGoal.targetAmount)}")
 
@@ -149,6 +149,7 @@ class GoalAppWidgetProvider : AppWidgetProvider() {
                     views.setTextColor(R.id.widget_current_amount, valueColor)
                     views.setTextColor(R.id.widget_percentage, labelColor)
                     views.setTextColor(R.id.widget_target_amount, labelColor)
+                    views.setInt(R.id.widget_title_icon, "setColorFilter", labelColor)
                 } catch (e: Exception) {}
 
                 val progressRatio = if (fundGoal.targetAmount > 0) {

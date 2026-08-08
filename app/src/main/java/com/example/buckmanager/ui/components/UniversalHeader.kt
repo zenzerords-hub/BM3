@@ -114,7 +114,7 @@ fun UniversalHeader(
                 Icon(
                     imageVector = if (hideBalances) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                     contentDescription = "Toggle Balance Visibility",
-                    tint = if (hideBalances) Color(0xFF9CA3AF) else iconTint,
+                    tint = if (hideBalances) Color(0xFF9CA3AF) else Color(0xFF2563EB),
                     modifier = Modifier.size(24.dp)
                 )
             }
