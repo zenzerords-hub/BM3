@@ -231,22 +231,31 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
 
     // Calculated fields
     fun getTotalIncome(): Double = _transactions.value.filter { it.type == "income" }.sumOf { it.amount }
-    fun getTotalExpense(): Double = _transactions.value.filter { it.type == "expense" }.sumOf { it.amount }
+    
+    fun getTotalExpense(): Double = _transactions.value.filter { 
+        it.type == "expense" && it.category != "goal" && !(it.category == "main" && it.description.contains("Goal"))
+    }.sumOf { it.amount }
+    
     fun getNetWorth(): Double = getTotalIncome() - getTotalExpense()
 
     fun getEnvelopeStats(envelopeId: String): EnvelopeStats {
         val env = _envelopes.value.find { it.id == envelopeId } ?: return EnvelopeStats()
         
-        // Pool is Total Income minus any "Unallocated" (main) expenses like Goal deposits.
-        // This prevents double-deduction when a user makes an expense from a specific envelope.
         val totalIncome = getTotalIncome()
-        val unallocatedExpenses = _transactions.value.filter { it.type == "expense" && it.category == "main" }.sumOf { it.amount }
-        val pool = (totalIncome - unallocatedExpenses).coerceAtLeast(0.0)
+        
+        // Goal deposits shrink the shared pool, regular expenses do not.
+        val goalTransfers = _transactions.value.filter { 
+            it.type == "expense" && (it.category == "goal" || (it.category == "main" && it.description.contains("Goal")))
+        }.sumOf { it.amount }
+        
+        val pool = (totalIncome - goalTransfers).coerceAtLeast(0.0)
         
         val allocated = pool * (env.percentage / 100.0)
         
-        // Main expenses already reduced the pool, so they are not counted as 'spent' against its own percentage
-        val spent = if (envelopeId == "main") 0.0 else _transactions.value.filter { it.type == "expense" && it.category == envelopeId }.sumOf { it.amount }
+        // Spent is just the true expenses in this envelope.
+        val spent = _transactions.value.filter { 
+            it.type == "expense" && it.category == envelopeId && !(it.category == "main" && it.description.contains("Goal"))
+        }.sumOf { it.amount }
         
         return EnvelopeStats(allocated = allocated, spent = spent, remaining = allocated - spent)
     }
@@ -466,12 +475,12 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
             saveSetting("fund_goal_config", json.encodeToString(updatedGoal))
             GoalAppWidgetProvider.saveGoalToPrefs(getApplication(), updatedGoal)
             
-            // Automatically log an expense to deduct from Main Envelope (main)
+            // Log as a goal transfer so it doesn't reduce Net Worth
             addTransaction(
                 type = "expense",
                 amount = amount,
-                category = "main",
-                description = "Deposit to My Goal"
+                category = "goal",
+                description = if (amount > 0) "Deposit to My Goal" else "Withdraw from My Goal"
             )
         }
     }
