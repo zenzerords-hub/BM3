@@ -2026,6 +2026,7 @@ fun AddEnvelopeModal(
                     }
                 }
             }
+            }
 
             // Bottom Actions
             Row(
