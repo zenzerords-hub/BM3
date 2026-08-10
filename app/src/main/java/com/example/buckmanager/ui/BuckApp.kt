@@ -127,7 +127,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                                 .padding(bottom = 16.dp, start = 24.dp, end = 24.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            val navBg = if (isDarkMode) Color(0xF10F1117) else Color(0xFAFFFFFF)
+                            val navBg = if (isDarkMode) Color(0xCC0F1117) else Color(0xCCFFFFFF)
                             val navBorder = if (isDarkMode) GoldAccent.copy(alpha = 0.35f) else Color(0xFFE2E8F0)
                             val unselectedTint = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF64748B)
                             val activeTint = if (isDarkMode) GoldAccent else Color(0xFF1D2A96)

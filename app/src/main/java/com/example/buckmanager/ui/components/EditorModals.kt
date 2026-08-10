@@ -1660,7 +1660,6 @@ fun EnvelopeEditorModal(
                     }
                 }
             }
-            }
 
             // Bottom Actions
             Row(
@@ -2024,9 +2023,9 @@ fun AddEnvelopeModal(
                             Slider(value = paddingLeft.toFloat(), onValueChange = { paddingLeft = it.toInt() }, valueRange = 0f..40f, colors = SliderDefaults.colors(thumbColor = GoldAccent, activeTrackColor = GoldAccent))
                         }
                     }
-                    }
                 }
             }
+
             // Bottom Actions
             Row(
                 modifier = Modifier
