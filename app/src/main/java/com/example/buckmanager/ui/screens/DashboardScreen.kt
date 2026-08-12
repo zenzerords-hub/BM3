@@ -733,6 +733,7 @@ fun DashboardScreen(
                         }
 
                         // Allocation Slider
+                        @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
                         androidx.compose.material3.Slider(
                             value = env.percentage.toFloat(),
                             onValueChange = { newValue ->
@@ -743,11 +744,37 @@ fun DashboardScreen(
                                 .fillMaxWidth()
                                 .padding(horizontal = env.paddingLeft.dp, vertical = 0.dp)
                                 .padding(bottom = 8.dp),
-                            colors = androidx.compose.material3.SliderDefaults.colors(
-                                thumbColor = parseHexColor(env.colorHex),
-                                activeTrackColor = parseHexColor(env.colorHex),
-                                inactiveTrackColor = parseHexColor(env.colorHex).copy(alpha = 0.2f)
-                            )
+                            thumb = {
+                                Box(
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .background(parseHexColor(env.colorHex), androidx.compose.foundation.shape.CircleShape)
+                                )
+                            },
+                            track = {
+                                val fraction = env.percentage.toFloat() / 100f
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(4.dp)
+                                        .background(
+                                            brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
+                                                colors = listOf(
+                                                    parseHexColor(env.colorHex).copy(alpha = 0.3f),
+                                                    parseHexColor(env.colorHex).copy(alpha = 0.05f)
+                                                )
+                                            ),
+                                            shape = androidx.compose.foundation.shape.RoundedCornerShape(2.dp)
+                                        )
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth(fraction = fraction.coerceIn(0f, 1f))
+                                            .fillMaxHeight()
+                                            .background(parseHexColor(env.colorHex), androidx.compose.foundation.shape.RoundedCornerShape(2.dp))
+                                    )
+                                }
+                            }
                         )
                     }
                 }
