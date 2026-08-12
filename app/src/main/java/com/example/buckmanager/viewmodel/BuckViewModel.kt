@@ -408,10 +408,11 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
                 // Sort others by percentage descending so we subtract from the largest ones first
                 mutableOthers.sortByDescending { it.percentage }
                 
-                for (other in mutableOthers) {
+                for (i in mutableOthers.indices) {
                     if (remainingToSubtract == 0) break
+                    val other = mutableOthers[i]
                     val canSubtract = minOf(remainingToSubtract, other.percentage)
-                    other.percentage -= canSubtract
+                    mutableOthers[i] = other.copy(percentage = other.percentage - canSubtract)
                     remainingToSubtract -= canSubtract
                 }
                 
