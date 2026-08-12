@@ -676,13 +676,14 @@ fun DashboardScreen(
                             )
                         }
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = env.paddingLeft.dp, top = env.paddingTop.dp, end = env.paddingRight.dp, bottom = env.paddingBottom.dp)
-                                .clickable { onEditEnvelope(env) },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = env.paddingLeft.dp, top = env.paddingTop.dp, end = env.paddingRight.dp, bottom = if (env.paddingBottom > 8) (env.paddingBottom - 8).dp else env.paddingBottom.dp)
+                                    .clickable { onEditEnvelope(env) },
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                             Box(
                                 modifier = Modifier
                                     .size(56.dp)
@@ -730,6 +731,24 @@ fun DashboardScreen(
                                 modifier = Modifier.size(24.dp)
                             )
                         }
+
+                        // Allocation Slider
+                        androidx.compose.material3.Slider(
+                            value = env.percentage.toFloat(),
+                            onValueChange = { newValue ->
+                                viewModel.updateEnvelope(env.copy(percentage = newValue.toInt()))
+                            },
+                            valueRange = 0f..100f,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = env.paddingLeft.dp, vertical = 0.dp)
+                                .padding(bottom = 8.dp),
+                            colors = androidx.compose.material3.SliderDefaults.colors(
+                                thumbColor = parseHexColor(env.colorHex),
+                                activeTrackColor = parseHexColor(env.colorHex),
+                                inactiveTrackColor = parseHexColor(env.colorHex).copy(alpha = 0.2f)
+                            )
+                        )
                     }
                 }
             }

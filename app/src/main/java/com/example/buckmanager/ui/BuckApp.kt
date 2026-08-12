@@ -38,7 +38,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.buckmanager.model.Envelope
 import com.example.buckmanager.ui.components.*
-import com.example.buckmanager.ui.screens.AccountantScreen
+
 import com.example.buckmanager.ui.screens.DashboardScreen
 import com.example.buckmanager.ui.screens.LoginScreen
 import com.example.buckmanager.ui.screens.OnboardingScreen
@@ -114,7 +114,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
         Box(modifier = Modifier.fillMaxSize()) {
             Scaffold(
                 bottomBar = {
-                    if (currentRoute in listOf("dashboard", "transactions", "strategy")) {
+                    if (currentRoute in listOf("dashboard", "transactions")) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -179,24 +179,6 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                                             imageVector = if (currentRoute == "transactions") Icons.Filled.AddCircle else Icons.Outlined.AddCircleOutline,
                                             contentDescription = "Transactions",
                                             tint = if (currentRoute == "transactions") activeTint else unselectedTint,
-                                            modifier = Modifier.size(28.dp)
-                                        )
-                                    }
-
-                                    // Strategy tab
-                                    IconButton(
-                                        onClick = {
-                                            navController.navigate("strategy") {
-                                                popUpTo("dashboard") { saveState = true }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
-                                        }
-                                    ) {
-                                        Icon(
-                                            imageVector = if (currentRoute == "strategy") Icons.Filled.PieChart else Icons.Outlined.PieChart,
-                                            contentDescription = "Strategy",
-                                            tint = if (currentRoute == "strategy") activeTint else unselectedTint,
                                             modifier = Modifier.size(28.dp)
                                         )
                                     }
@@ -272,12 +254,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                         )
                     }
 
-                    composable("strategy") {
-                        AccountantScreen(
-                            viewModel = viewModel,
-                            onOpenSettings = { showSettings = true }
-                        )
-                    }
+
                 }
             }
 
