@@ -752,8 +752,8 @@ fun DashboardScreen(
                     }
                 }
             }
-
         }
+    }
 
 
         GoalDepositModal(
