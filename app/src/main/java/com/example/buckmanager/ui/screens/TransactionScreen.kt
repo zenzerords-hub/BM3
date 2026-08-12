@@ -87,6 +87,7 @@ fun TransactionScreen(
                     isEditLocked = isEditLocked,
                     isDarkMode = isDarkMode,
                     showUnlockCustomization = false,
+                    showHideBalances = false,
                     onToggleLock = { viewModel.toggleEditLock() },
                     textColorHex = globalBg.textColorHex
                 )
@@ -244,63 +245,6 @@ fun TransactionScreen(
             }
 
 
-            // Funding Goal Header
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Funding Goal", color = globalTextColor, fontWeight = FontWeight.Black, fontSize = 20.sp)
-                    TextButton(onClick = onEditFundGoal) {
-                        Text("Manage", color = GoldAccent, fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
-            
-            item {
-                val goalConfig by viewModel.fundGoal.collectAsState()
-                val goalLabelColor = parseHexColor(goalConfig.labelColorHex, GoldAccent)
-                Card(
-                    modifier = Modifier.fillMaxWidth().clickable { onEditFundGoal() },
-                    shape = RoundedCornerShape(goalConfig.radiusTopLeft.dp, goalConfig.radiusTopRight.dp, goalConfig.radiusBottomRight.dp, goalConfig.radiusBottomLeft.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = parseHexColor(goalConfig.backgroundColorHex, Color(0xFF181C26))
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(goalLabelColor.copy(alpha = 0.15f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(Icons.Default.Savings, contentDescription = null, tint = goalLabelColor, modifier = Modifier.size(20.dp))
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(goalConfig.name, color = parseHexColor(goalConfig.valueColorHex, Color.White), fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                            if (goalConfig.targetAmount > 0) {
-                                Text(
-                                    "Target: ${formatRp(goalConfig.targetAmount)}",
-                                    color = goalLabelColor,
-                                    fontSize = 11.sp
-                                )
-                            }
-                        }
-                        Icon(
-                            imageVector = Icons.Default.ChevronRight,
-                            contentDescription = null,
-                            tint = Color(0xFF9CA3AF),
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
-            }
 
             // History Header
             item {

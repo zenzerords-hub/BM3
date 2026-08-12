@@ -233,7 +233,8 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
     fun getNetWorth(): Double = getTotalIncome() - getTotalExpense()
 
     fun getEnvelopeStats(envelopeId: String): EnvelopeStats {
-        val env = _envelopes.value.find { it.id == envelopeId } ?: return EnvelopeStats()
+        val envelopes = _envelopes.value
+        val env = envelopes.find { it.id == envelopeId } ?: return EnvelopeStats()
         
         val totalIncome = getTotalIncome()
         
@@ -244,14 +245,40 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
         
         val pool = (totalIncome - goalTransfers).coerceAtLeast(0.0)
         
-        val allocated = pool * (env.percentage / 100.0)
+        // Calculate raw remaining for ALL envelopes to find overspending
+        var totalOverspent = 0.0
+        val rawStats = envelopes.associate { e ->
+            val allocated = pool * (e.percentage / 100.0)
+            val spent = _transactions.value.filter { 
+                it.type == "expense" && it.category == e.id && !(it.category == "main" && it.description.contains("Goal"))
+            }.sumOf { it.amount }
+            val rawRemaining = allocated - spent
+            if (rawRemaining < 0) {
+                totalOverspent += -rawRemaining
+            }
+            e.id to Triple(allocated, spent, rawRemaining)
+        }
         
-        // Spent is just the true expenses in this envelope.
-        val spent = _transactions.value.filter { 
-            it.type == "expense" && it.category == envelopeId && !(it.category == "main" && it.description.contains("Goal"))
-        }.sumOf { it.amount }
+        val totalPositiveRemaining = rawStats.values.filter { it.third > 0 }.sumOf { it.third }
+        val myRaw = rawStats[envelopeId] ?: Triple(0.0, 0.0, 0.0)
         
-        return EnvelopeStats(allocated = allocated, spent = spent, remaining = allocated - spent)
+        val allocated = myRaw.first
+        val spent = myRaw.second
+        val rawRemaining = myRaw.third
+        
+        val adjustedRemaining = if (rawRemaining < 0) {
+            0.0 // No minus number
+        } else {
+            // Deduct proportional overspend from other envelopes
+            if (totalPositiveRemaining > 0) {
+                val deduction = totalOverspent * (rawRemaining / totalPositiveRemaining)
+                (rawRemaining - deduction).coerceAtLeast(0.0)
+            } else {
+                0.0 // Overspent entire net worth
+            }
+        }
+        
+        return EnvelopeStats(allocated = allocated, spent = spent, remaining = adjustedRemaining)
     }
 
     // Actions
@@ -367,7 +394,47 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
     fun updateEnvelope(updated: Envelope) {
         viewModelScope.launch(Dispatchers.IO) {
             markCustomized()
-            val newList = _envelopes.value.map { if (it.id == updated.id) updated else it }
+            val oldList = _envelopes.value
+            val oldEnv = oldList.find { it.id == updated.id } ?: return@launch
+            
+            val diff = updated.percentage - oldEnv.percentage
+            var actualNewPercentage = updated.percentage
+            
+            val newList = if (diff > 0) {
+                // User is increasing this envelope, so we must decrease others
+                var remainingToSubtract = diff
+                val mutableOthers = oldList.filter { it.id != updated.id }.map { it.copy() }.toMutableList()
+                
+                // Sort others by percentage descending so we subtract from the largest ones first
+                mutableOthers.sortByDescending { it.percentage }
+                
+                for (other in mutableOthers) {
+                    if (remainingToSubtract == 0) break
+                    val canSubtract = minOf(remainingToSubtract, other.percentage)
+                    other.percentage -= canSubtract
+                    remainingToSubtract -= canSubtract
+                }
+                
+                // If we couldn't subtract all of it, clamp the new percentage
+                actualNewPercentage -= remainingToSubtract
+                
+                oldList.map { env ->
+                    if (env.id == updated.id) updated.copy(percentage = actualNewPercentage)
+                    else mutableOthers.find { it.id == env.id } ?: env
+                }
+            } else if (diff < 0) {
+                // User is decreasing this envelope, add the difference to "main" (or another if main is being decreased)
+                val targetId = if (updated.id != "main") "main" else oldList.firstOrNull { it.id != "main" }?.id ?: updated.id
+                
+                oldList.map { env ->
+                    if (env.id == updated.id) updated
+                    else if (env.id == targetId) env.copy(percentage = env.percentage + (-diff))
+                    else env
+                }
+            } else {
+                oldList.map { if (it.id == updated.id) updated else it }
+            }
+            
             _envelopes.value = newList
             saveSetting("envelopes_config", json.encodeToString(newList))
         }

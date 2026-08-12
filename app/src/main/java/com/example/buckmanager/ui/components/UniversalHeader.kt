@@ -38,6 +38,7 @@ fun UniversalHeader(
     onCustomizeClick: (() -> Unit)? = null,
     onPremiumClick: () -> Unit = {},
     onToggleHideBalances: () -> Unit = {},
+    showHideBalances: Boolean = true,
     textColorHex: String? = null,
     appNameColorHex: String? = null,
     titleColorHex: String? = null
@@ -103,20 +104,22 @@ fun UniversalHeader(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Eye toggle for hide balances (always available, no premium gate)
-            IconButton(
-                onClick = onToggleHideBalances,
-                modifier = Modifier
-                    .size(46.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(buttonBg)
-            ) {
-                Icon(
-                    imageVector = if (hideBalances) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                    contentDescription = "Toggle Balance Visibility",
-                    tint = if (hideBalances) Color(0xFF9CA3AF) else Color(0xFF2563EB),
-                    modifier = Modifier.size(24.dp)
-                )
+            // Eye toggle for hide balances
+            if (showHideBalances) {
+                IconButton(
+                    onClick = onToggleHideBalances,
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(buttonBg)
+                ) {
+                    Icon(
+                        imageVector = if (hideBalances) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        contentDescription = "Toggle Balance Visibility",
+                        tint = if (hideBalances) Color(0xFF9CA3AF) else Color(0xFF2563EB),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
 
             if (showUnlockCustomization) {
