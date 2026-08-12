@@ -61,7 +61,7 @@ fun DashboardScreen(
     val envelopes by viewModel.envelopes.collectAsState()
     val currencySymbol by viewModel.currencySymbol.collectAsState()
     val isEditLocked by viewModel.isEditLocked.collectAsState()
-    val streakData by viewModel.streakData.collectAsState()
+
     val isDarkMode by viewModel.isDarkMode.collectAsState()
 
     var showGoalDepositModal by remember { mutableStateOf(false) }

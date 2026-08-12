@@ -42,7 +42,7 @@ fun TransactionScreen(
     val isEditLocked by viewModel.isEditLocked.collectAsState()
     val envelopes by viewModel.envelopes.collectAsState()
 
-    val streakData by viewModel.streakData.collectAsState()
+
     val isDarkMode by viewModel.isDarkMode.collectAsState()
 
     val cardBg = if (isDarkMode) Color(0xFF181C26) else Color(0xFFFFFFFF)

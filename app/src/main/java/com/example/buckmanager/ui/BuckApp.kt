@@ -80,7 +80,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
         var showFundGoalEditor by remember { mutableStateOf(false) }
         var showBackgroundEditor by remember { mutableStateOf(false) }
 
-        var showStreakRewardModal by remember { mutableStateOf(false) }
+
 
         val globalBg by viewModel.globalBackground.collectAsState()
         val headerCards by viewModel.headerCardsConfig.collectAsState()
@@ -109,12 +109,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
             }
         }
 
-        LaunchedEffect(Unit) {
-            val (rewardEarned, _) = viewModel.checkAndUpdateStreak()
-            if (rewardEarned) {
-                showStreakRewardModal = true
-            }
-        }
+
 
         Box(modifier = Modifier.fillMaxSize()) {
             Scaffold(
@@ -375,10 +370,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
             )
 
 
-            StreakRewardModal(
-                visible = showStreakRewardModal,
-                onDismiss = { showStreakRewardModal = false }
-            )
+
 
             // User Notice Floating Banner (Premium Glassmorphic Toast)
             AnimatedVisibility(

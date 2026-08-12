@@ -81,8 +81,7 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
     private val _monetization = MutableStateFlow(MonetizationState())
     val monetization: StateFlow<MonetizationState> = _monetization.asStateFlow()
 
-    private val _streakData = MutableStateFlow(StreakData())
-    val streakData: StateFlow<StreakData> = _streakData.asStateFlow()
+
 
 
     private val _isEditLocked = MutableStateFlow(true)
@@ -210,12 +209,7 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
                 } catch (e: Exception) {}
             }
 
-            // Streak
-            settings["streak_data"]?.let { streakStr ->
-                try {
-                    _streakData.value = json.decodeFromString(streakStr)
-                } catch (e: Exception) {}
-            }
+
 
             // User Email
             _userEmail.value = settings["user_email"]
@@ -534,40 +528,7 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
         _userNotice.value = "🎉 Lifetime Premium Unlocked! Edit Mode is Active. Enjoy full customization!"
     }
 
-    fun checkAndUpdateStreak(): Pair<Boolean, Int> {
-        val currentMon = _monetization.value
-        if (currentMon.isPremium) {
-             val newData = StreakData(currentStreak = 0, lastLoginDate = null, ticketsClaimed = 0)
-             _streakData.value = newData
-             viewModelScope.launch(Dispatchers.IO) { saveSetting("streak_data", json.encodeToString(newData)) }
-             return Pair(false, 0)
-        }
 
-        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-        val today = sdf.format(Date())
-        val cal = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }
-        val yesterday = sdf.format(cal.time)
-        val currentStreak = _streakData.value
-        if (currentStreak.lastLoginDate == today) {
-            return Pair(false, currentStreak.currentStreak)
-        }
-        var newStreak = if (currentStreak.lastLoginDate == yesterday) currentStreak.currentStreak + 1 else 1
-        var rewardEarned = false
-        var ticketsClaimed = currentStreak.ticketsClaimed
-        if (newStreak >= 7) {
-            rewardEarned = true
-            newStreak = 0
-            ticketsClaimed += 1
-            val newMon = currentMon.copy(isPremium = true)
-            updateMonetization(newMon)
-        }
-        val newData = StreakData(currentStreak = newStreak, lastLoginDate = today, ticketsClaimed = ticketsClaimed)
-        _streakData.value = newData
-        viewModelScope.launch(Dispatchers.IO) {
-            saveSetting("streak_data", json.encodeToString(newData))
-        }
-        return Pair(rewardEarned, newStreak)
-    }
 
 
     fun toggleHideBalances() { _hideBalances.value = !_hideBalances.value }

@@ -621,40 +621,7 @@ fun FundGoalEditorModal(
 
 
 
-@Composable
-fun StreakRewardModal(
-    visible: Boolean,
-    onDismiss: () -> Unit
-) {
-    if (!visible) return
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = Color(0xFF181C26),
-        title = {
-            Text("🎉 7-DAY STREAK COMPLETE!", color = GoldAccent, fontWeight = FontWeight.Black)
-        },
-        text = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("🔥", fontSize = 48.sp)
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    "Congratulations! You've logged in for 7 consecutive days. You have been rewarded 1 Customization Pass!",
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = GoldAccent)
-            ) {
-                Text("Claim Pass", color = Color.White, fontWeight = FontWeight.Bold)
-            }
-        }
-    )
-}
 
 @Composable
 fun SettingsModal(
@@ -827,94 +794,7 @@ fun SettingsModal(
                         }
                     }
 
-                    // 2. Login Streak Card
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp),
-                        color = if (isDarkMode) Color(0xFF1C1929) else Color(0xFFF4F5F9)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("🔥", fontSize = 16.sp)
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = "Login Streak",
-                                        color = if (isDarkMode) Color.White else Color(0xFF121926),
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
 
-                                Text(
-                                    text = "DAY 1 OF 7",
-                                    color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.sp
-                                )
-                            }
-
-                            // Days Row (1 to 7)
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                (1..7).forEach { day ->
-                                    Box(
-                                        modifier = Modifier
-                                            .size(32.dp)
-                                            .clip(CircleShape)
-                                            .background(if (day == 1) GoldAccent else (if (isDarkMode) Color(0xFF282436) else Color(0xFFE2E8F0)))
-                                            .border(
-                                                1.dp,
-                                                if (day == 1) GoldAccent else (if (isDarkMode) Color(0xFF38334A) else Color(0xFFCBD5E1)),
-                                                CircleShape
-                                            ),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        if (day == 1) {
-                                            Icon(
-                                                imageVector = Icons.Default.Check,
-                                                contentDescription = "Day 1 Complete",
-                                                tint = Color.White,
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                        } else {
-                                            Text(
-                                                text = day.toString(),
-                                                color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A),
-                                                fontSize = 12.sp,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Reward callout
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("🎟", fontSize = 14.sp)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "7-Day Streak = 1 Free Customization Ticket",
-                                    color = if (isDarkMode) GoldAccent else Color(0xFFF5B041),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                        }
-                    }
 
                     // 3. SAVE YOUR PROGRESS
                     Text(

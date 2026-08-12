@@ -118,12 +118,7 @@ data class MonetizationState(
     val adTickets: Int = 0
 )
 
-@Serializable
-data class StreakData(
-    val currentStreak: Int = 0,
-    val lastLoginDate: String? = null,
-    val ticketsClaimed: Int = 0
-)
+
 
 data class EnvelopeStats(
     val allocated: Double = 0.0,
