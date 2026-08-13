@@ -782,8 +782,9 @@ fun DashboardScreen(
                         )
                     }
                 }
-            }
-        }
+            } // closes Box(647)
+        } // closes items(envelopes)
+    } // closes LazyColumn(104)
 
         // Floating Action Button for Add Transaction
         FloatingActionButton(
