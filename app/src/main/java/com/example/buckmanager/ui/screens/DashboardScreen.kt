@@ -128,7 +128,7 @@ fun DashboardScreen(
             // Total Net Worth Card
             item {
                 val netCard = headerCards.netWorth
-                val netContainerColor = if (!netCard.backgroundImageUri.isNullOrBlank()) Color.Transparent else parseHexColor(netCard.backgroundColorHex, Color(0xFF181C26))
+                val netContainerColor = if (!netCard.backgroundImageUri.isNullOrBlank()) Color.Transparent else parseHexColor(netCard.backgroundColorHex, Color(0xFF3673FC))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -221,7 +221,7 @@ fun DashboardScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     val incCard = headerCards.income
-                    val incContainerColor = if (!incCard.backgroundImageUri.isNullOrBlank()) Color.Transparent else parseHexColor(incCard.backgroundColorHex, Color(0xFF1A3A2A))
+                    val incContainerColor = if (!incCard.backgroundImageUri.isNullOrBlank()) Color.Transparent else parseHexColor(incCard.backgroundColorHex, Color(0xFFF4F7FF))
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -268,10 +268,10 @@ fun DashboardScreen(
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         // Icon in circle
                                         Box(
-                                            modifier = Modifier.size(28.dp).clip(CircleShape).background(Color(0xFF10B981).copy(alpha = 0.15f)),
+                                            modifier = Modifier.size(28.dp).clip(CircleShape).background(Color(0xFF3673FC)),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Icon(Icons.Default.ArrowUpward, contentDescription = null, tint = Color(0xFF10B981), modifier = Modifier.size(16.dp))
+                                            Icon(Icons.Default.ArrowUpward, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                                         }
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
@@ -314,7 +314,7 @@ fun DashboardScreen(
                     }
 
                     val expCard = headerCards.expense
-                    val expContainerColor = if (!expCard.backgroundImageUri.isNullOrBlank()) Color.Transparent else parseHexColor(expCard.backgroundColorHex, Color(0xFF381E29))
+                    val expContainerColor = if (!expCard.backgroundImageUri.isNullOrBlank()) Color.Transparent else parseHexColor(expCard.backgroundColorHex, Color(0xFFFFF5F5))
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -360,10 +360,10 @@ fun DashboardScreen(
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         // Icon in circle
                                         Box(
-                                            modifier = Modifier.size(28.dp).clip(CircleShape).background(Color(0xFFEF4444).copy(alpha = 0.15f)),
+                                            modifier = Modifier.size(28.dp).clip(CircleShape).background(Color(0xFFFCBF36)),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Icon(Icons.Default.ArrowDownward, contentDescription = null, tint = Color(0xFFEF4444), modifier = Modifier.size(16.dp))
+                                            Icon(Icons.Default.ArrowDownward, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                                         }
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(
@@ -539,10 +539,21 @@ fun DashboardScreen(
                             }
 
                             if (fundGoal.targetAmount <= 0.0) {
+                                // Progress Bar
+                                LinearProgressIndicator(
+                                    progress = { progressRatio },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(8.dp)
+                                        .clip(RoundedCornerShape(4.dp)),
+                                    color = labelColor,
+                                    trackColor = if (isDarkMode) Color.White.copy(alpha = 0.15f) else Color(0xFFF1F5F9)
+                                )
+
                                 Button(
                                     onClick = { onEditFundGoal() },
                                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = labelColor),
+                                    colors = ButtonDefaults.buttonColors(containerColor = parseHexColor(fundGoal.btnBgColorHex, labelColor)),
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
                                     Text("SET A GOAL", color = parseHexColor(fundGoal.btnTextColorHex, Color.White), fontWeight = FontWeight.Bold)
@@ -563,13 +574,13 @@ fun DashboardScreen(
                                     ) {
                                         Text(
                                             text = "Target: ${formatRp(fundGoal.targetAmount)}",
-                                            color = labelColor.copy(alpha = 0.85f),
+                                            color = valueColor.copy(alpha = 0.85f),
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Medium
                                         )
                                         Text(
                                             text = if (remainingAmount <= 0) "🎉 Goal Reached!" else "Remaining: ${if (hideBalances) currencySymbol + "•••••" else formatRp(remainingAmount)}",
-                                            color = if (remainingAmount <= 0) Color(0xFF34D399) else labelColor.copy(alpha = 0.85f),
+                                            color = if (remainingAmount <= 0) Color(0xFF34D399) else valueColor.copy(alpha = 0.85f),
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.SemiBold
                                         )
@@ -584,7 +595,7 @@ fun DashboardScreen(
                                         .height(8.dp)
                                         .clip(RoundedCornerShape(4.dp)),
                                     color = labelColor,
-                                    trackColor = if (isDarkMode) Color.White.copy(alpha = 0.15f) else Color.Black.copy(alpha = 0.1f)
+                                    trackColor = if (isDarkMode) Color.White.copy(alpha = 0.15f) else Color(0xFFF1F5F9)
                                 )
 
                                 Row(
@@ -626,15 +637,15 @@ fun DashboardScreen(
                         fontWeight = FontWeight.Black,
                         fontSize = 20.sp
                     )
-                    IconButton(
+                    TextButton(
                         onClick = onAddEnvelopeClick,
-                        modifier = Modifier.size(32.dp)
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.AddCircle,
-                            contentDescription = "Add Envelope",
-                            tint = headerColor,
-                            modifier = Modifier.size(24.dp)
+                        Text(
+                            text = "ADD",
+                            color = Color(0xFFFCBF36),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
                         )
                     }
                 }
@@ -792,8 +803,9 @@ fun DashboardScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 24.dp, bottom = 100.dp),
-            containerColor = GoldAccent,
-            contentColor = Color.White
+            containerColor = Color(0xFFFCBF36),
+            contentColor = Color.White,
+            shape = RoundedCornerShape(16.dp)
         ) {
             Icon(Icons.Default.Add, contentDescription = "Add Transaction")
         }

@@ -64,12 +64,12 @@ fun UniversalHeader(
                 modifier = Modifier
                     .size(46.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(GoldAccent),
+                    .background(Color(0xFF3673FC)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "B",
-                    color = Color(0xFF1E293B),
+                    color = Color.White,
                     fontWeight = FontWeight.Black,
                     fontSize = 24.sp
                 )
@@ -116,7 +116,7 @@ fun UniversalHeader(
                     Icon(
                         imageVector = if (hideBalances) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                         contentDescription = "Toggle Balance Visibility",
-                        tint = if (hideBalances) Color(0xFF9CA3AF) else Color(0xFF2563EB),
+                        tint = if (hideBalances) Color(0xFF9CA3AF) else Color(0xFF3673FC),
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -135,7 +135,7 @@ fun UniversalHeader(
                             modifier = Modifier.fillMaxHeight().padding(horizontal = 12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFF4F46E5), modifier = Modifier.size(16.dp))
+                            Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFCBF36), modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = "Unlock\nCustomization",
@@ -158,7 +158,7 @@ fun UniversalHeader(
                         Icon(
                             imageVector = if (isEditLocked) Icons.Default.Lock else Icons.Default.LockOpen,
                             contentDescription = "Toggle Lock",
-                            tint = if (isEditLocked) Color(0xFFEF476F) else Color(0xFF4ECB8D),
+                            tint = Color(0xFFFCBF36),
                             modifier = Modifier.size(24.dp)
                         )
                     }

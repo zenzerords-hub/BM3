@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PieChart
@@ -125,16 +126,16 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                             val navBg = if (isDarkMode) Color(0xCC0F1117) else Color(0xCCFFFFFF)
                             val navBorder = if (isDarkMode) GoldAccent.copy(alpha = 0.35f) else Color(0xFFE2E8F0)
                             val unselectedTint = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF64748B)
-                            val activeTint = if (isDarkMode) GoldAccent else Color(0xFF1D2A96)
+                            val activeTint = if (isDarkMode) Color.White else Color.Black
 
                             Surface(
                                 modifier = Modifier
                                     .height(58.dp)
-                                    .clip(RoundedCornerShape(29.dp))
+                                    .clip(RoundedCornerShape(16.dp))
                                     .border(
                                         1.dp,
                                         navBorder,
-                                        RoundedCornerShape(29.dp)
+                                        RoundedCornerShape(16.dp)
                                     ),
                                 color = navBg,
                                 tonalElevation = 0.dp,
@@ -176,7 +177,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                                         }
                                     ) {
                                         Icon(
-                                            imageVector = if (currentRoute == "transactions") Icons.Filled.AddCircle else Icons.Outlined.AddCircleOutline,
+                                            imageVector = Icons.Filled.List,
                                             contentDescription = "Transactions",
                                             tint = if (currentRoute == "transactions") activeTint else unselectedTint,
                                             modifier = Modifier.size(28.dp)

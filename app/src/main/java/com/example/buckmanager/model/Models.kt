@@ -75,9 +75,9 @@ data class HeaderCardConfig(
 
 @Serializable
 data class HeaderCardsConfig(
-    val netWorth: HeaderCardConfig = HeaderCardConfig(backgroundColorHex = "#2563EB", radiusTopLeft = 28, radiusTopRight = 28, radiusBottomRight = 28, radiusBottomLeft = 28, labelColorHex = "#FFFFFF", valueColorHex = "#FFFFFF", borderTop = 0, borderRight = 0, borderBottom = 0, borderLeft = 0),
-    val income: HeaderCardConfig = HeaderCardConfig(backgroundColorHex = "#ECFDF5", radiusTopLeft = 20, radiusTopRight = 20, radiusBottomRight = 20, radiusBottomLeft = 20, labelColorHex = "#047857", valueColorHex = "#059669", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1),
-    val expense: HeaderCardConfig = HeaderCardConfig(backgroundColorHex = "#FCE4EC", radiusTopLeft = 20, radiusTopRight = 20, radiusBottomRight = 20, radiusBottomLeft = 20, labelColorHex = "#C2185B", valueColorHex = "#EC407A", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1)
+    val netWorth: HeaderCardConfig = HeaderCardConfig(backgroundColorHex = "#3673FC", radiusTopLeft = 28, radiusTopRight = 28, radiusBottomRight = 28, radiusBottomLeft = 28, labelColorHex = "#FFFFFF", valueColorHex = "#FFFFFF", borderTop = 0, borderRight = 0, borderBottom = 0, borderLeft = 0),
+    val income: HeaderCardConfig = HeaderCardConfig(backgroundColorHex = "#F4F7FF", radiusTopLeft = 20, radiusTopRight = 20, radiusBottomRight = 20, radiusBottomLeft = 20, labelColorHex = "#3673FC", valueColorHex = "#3673FC", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1, borderColorHex = "#E2E8F0", elevation = 0),
+    val expense: HeaderCardConfig = HeaderCardConfig(backgroundColorHex = "#FFFDF5", radiusTopLeft = 20, radiusTopRight = 20, radiusBottomRight = 20, radiusBottomLeft = 20, labelColorHex = "#FCBF36", valueColorHex = "#FCBF36", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1, borderColorHex = "#FEECC8", elevation = 0)
 )
 
 @Serializable
@@ -85,20 +85,20 @@ data class FundGoalConfig(
     val name: String = "My Goal",
     val targetAmount: Double = 0.0,
     val currentAmount: Double = 0.0,
-    val backgroundColorHex: String = "#181C26",
+    val backgroundColorHex: String = "#FFFFFF",
     val backgroundImageUri: String? = null,
     val dimOpacity: Int = 30,
     val radiusTopLeft: Int = 21,
     val radiusTopRight: Int = 21,
     val radiusBottomRight: Int = 21,
     val radiusBottomLeft: Int = 21,
-    val labelColorHex: String = "#2563EB",
-    val valueColorHex: String = "#FFFFFF",
+    val labelColorHex: String = "#3673FC",
+    val valueColorHex: String = "#121926",
     val borderTop: Int = 1,
     val borderRight: Int = 1,
     val borderBottom: Int = 1,
     val borderLeft: Int = 1,
-    val borderColorHex: String = "#3B82F6",
+    val borderColorHex: String = "#E2E8F0",
     val paddingTop: Int = 13,
     val paddingRight: Int = 13,
     val paddingBottom: Int = 13,
@@ -106,9 +106,9 @@ data class FundGoalConfig(
     val useGradient: Boolean = false,
     val gradientColors: List<String> = emptyList(),
     val gradientAngle: Float = 0f,
-    val btnBgColorHex: String = "#2563EB",
+    val btnBgColorHex: String = "#3673FC",
     val btnTextColorHex: String = "#FFFFFF",
-    val elevation: Int = 2
+    val elevation: Int = 0
 )
 
 @Serializable
