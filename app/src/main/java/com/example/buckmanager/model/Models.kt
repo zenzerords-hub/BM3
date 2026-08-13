@@ -37,7 +37,7 @@ data class Envelope(
 
 @Serializable
 data class GlobalBackgroundConfig(
-    val backgroundColorHex: String = "#F0F4FA",
+    val backgroundColorHex: String = "#F6FAFD",
     val backgroundImageUri: String? = null,
     val dimOpacity: Int = 30,
     val particleEffect: String = "none", // "none", "lines", "starfall"

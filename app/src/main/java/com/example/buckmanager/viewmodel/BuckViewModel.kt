@@ -361,7 +361,7 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
             saveSetting("fund_goal_config", json.encodeToString(fg))
             saveSetting("envelopes_config", json.encodeToString(envs))
         } else {
-            val bg = GlobalBackgroundConfig(backgroundColorHex = "#F0F4FA", textColorHex = "#0F172A", appNameColorHex = "#000000", titleColorHex = "#000000", budgetEnvelopesColorHex = "#000000")
+            val bg = GlobalBackgroundConfig(backgroundColorHex = "#F6FAFD", textColorHex = "#0F172A", appNameColorHex = "#000000", titleColorHex = "#000000", budgetEnvelopesColorHex = "#000000")
             val hc = HeaderCardsConfig(
                 netWorth = HeaderCardConfig(backgroundColorHex = "#3673FC", radiusTopLeft = 28, radiusTopRight = 28, radiusBottomRight = 28, radiusBottomLeft = 28, labelColorHex = "#FFFFFF", valueColorHex = "#FFFFFF", borderTop = 0, borderRight = 0, borderBottom = 0, borderLeft = 0, elevation = 0),
                 income = HeaderCardConfig(backgroundColorHex = "#F4F7FE", radiusTopLeft = 20, radiusTopRight = 20, radiusBottomRight = 20, radiusBottomLeft = 20, labelColorHex = "#3673FC", valueColorHex = "#3673FC", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1, borderColorHex = "#3673FC", elevation = 0),
