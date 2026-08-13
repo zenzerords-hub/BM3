@@ -836,7 +836,6 @@ fun DashboardScreen(
             )
         }
     }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
