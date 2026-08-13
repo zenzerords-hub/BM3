@@ -221,7 +221,7 @@ fun DashboardScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     val incCard = headerCards.income
-                    val incContainerColor = if (!incCard.backgroundImageUri.isNullOrBlank()) Color.Transparent else parseHexColor(incCard.backgroundColorHex, Color(0xFFF4F7FF))
+                    val incContainerColor = if (!incCard.backgroundImageUri.isNullOrBlank()) Color.Transparent else parseHexColor(incCard.backgroundColorHex, Color(0xFFF4F7FE))
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -314,7 +314,7 @@ fun DashboardScreen(
                     }
 
                     val expCard = headerCards.expense
-                    val expContainerColor = if (!expCard.backgroundImageUri.isNullOrBlank()) Color.Transparent else parseHexColor(expCard.backgroundColorHex, Color(0xFFFFF5F5))
+                    val expContainerColor = if (!expCard.backgroundImageUri.isNullOrBlank()) Color.Transparent else parseHexColor(expCard.backgroundColorHex, Color(0xFFFDF9ED))
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -574,13 +574,13 @@ fun DashboardScreen(
                                     ) {
                                         Text(
                                             text = "Target: ${formatRp(fundGoal.targetAmount)}",
-                                            color = valueColor.copy(alpha = 0.85f),
+                                            color = labelColor,
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Medium
                                         )
                                         Text(
                                             text = if (remainingAmount <= 0) "🎉 Goal Reached!" else "Remaining: ${if (hideBalances) currencySymbol + "•••••" else formatRp(remainingAmount)}",
-                                            color = if (remainingAmount <= 0) Color(0xFF34D399) else valueColor.copy(alpha = 0.85f),
+                                            color = if (remainingAmount <= 0) Color(0xFF34D399) else labelColor,
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.SemiBold
                                         )

@@ -76,8 +76,8 @@ data class HeaderCardConfig(
 @Serializable
 data class HeaderCardsConfig(
     val netWorth: HeaderCardConfig = HeaderCardConfig(backgroundColorHex = "#3673FC", radiusTopLeft = 28, radiusTopRight = 28, radiusBottomRight = 28, radiusBottomLeft = 28, labelColorHex = "#FFFFFF", valueColorHex = "#FFFFFF", borderTop = 0, borderRight = 0, borderBottom = 0, borderLeft = 0),
-    val income: HeaderCardConfig = HeaderCardConfig(backgroundColorHex = "#F4F7FF", radiusTopLeft = 20, radiusTopRight = 20, radiusBottomRight = 20, radiusBottomLeft = 20, labelColorHex = "#3673FC", valueColorHex = "#3673FC", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1, borderColorHex = "#E2E8F0", elevation = 0),
-    val expense: HeaderCardConfig = HeaderCardConfig(backgroundColorHex = "#FFFDF5", radiusTopLeft = 20, radiusTopRight = 20, radiusBottomRight = 20, radiusBottomLeft = 20, labelColorHex = "#FCBF36", valueColorHex = "#FCBF36", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1, borderColorHex = "#FEECC8", elevation = 0)
+    val income: HeaderCardConfig = HeaderCardConfig(backgroundColorHex = "#F4F7FE", radiusTopLeft = 20, radiusTopRight = 20, radiusBottomRight = 20, radiusBottomLeft = 20, labelColorHex = "#3673FC", valueColorHex = "#3673FC", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1, borderColorHex = "#3673FC", elevation = 0),
+    val expense: HeaderCardConfig = HeaderCardConfig(backgroundColorHex = "#FDF9ED", radiusTopLeft = 20, radiusTopRight = 20, radiusBottomRight = 20, radiusBottomLeft = 20, labelColorHex = "#FCBF36", valueColorHex = "#FCBF36", borderTop = 1, borderRight = 1, borderBottom = 1, borderLeft = 1, borderColorHex = "#FCBF36", elevation = 0)
 )
 
 @Serializable
