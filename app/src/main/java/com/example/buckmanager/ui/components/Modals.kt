@@ -1015,7 +1015,7 @@ fun SettingsModal(
                     ) {
                         Column {
                             // Theme Row
-                            val hasPremium = monetization.isPremium || monetization.hasLifetimeAccess
+                            val hasPremium = monetization.isPremium
                             if (!hasPremium || isThemeCustomized) {
                                 Row(
                                     modifier = Modifier
