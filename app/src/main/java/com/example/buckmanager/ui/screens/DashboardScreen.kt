@@ -7,6 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -20,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -66,6 +69,7 @@ fun DashboardScreen(
 
     var showGoalDepositModal by remember { mutableStateOf(false) }
     var showPremiumModal by remember { mutableStateOf(false) }
+    var showTransactionBottomSheet by remember { mutableStateOf(false) }
     val monetization by viewModel.monetization.collectAsState(initial = MonetizationState())
 
     val hideBalances by viewModel.hideBalances.collectAsState()
@@ -780,6 +784,18 @@ fun DashboardScreen(
                 }
             }
         }
+
+        // Floating Action Button for Add Transaction
+        FloatingActionButton(
+            onClick = { showTransactionBottomSheet = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 24.dp, bottom = 100.dp),
+            containerColor = GoldAccent,
+            contentColor = Color.White
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Add Transaction")
+        }
     }
 
 
@@ -809,5 +825,193 @@ fun DashboardScreen(
                 showPremiumModal = false
             }
         )
+
+        if (showTransactionBottomSheet) {
+            TransactionBottomSheet(
+                viewModel = viewModel,
+                envelopes = envelopes,
+                isDarkMode = isDarkMode,
+                onDismiss = { showTransactionBottomSheet = false }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TransactionBottomSheet(
+    viewModel: BuckViewModel,
+    envelopes: List<Envelope>,
+    isDarkMode: Boolean,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    
+    val cardBg = if (isDarkMode) Color(0xFF181C26) else Color(0xFFFFFFFF)
+    val innerBoxBg = if (isDarkMode) Color(0xFF0F1117) else Color(0xFFF4F5F9)
+    val textPrimary = if (isDarkMode) Color.White else Color(0xFF121926)
+    val textSecondary = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A)
+    val inputBorder = if (isDarkMode) Color(0xFF2A273C) else Color(0xFFE2E8F0)
+    val incomeColor = if (isDarkMode) Color(0xFF34D399) else Color(0xFF0E8345)
+    val expenseColor = if (isDarkMode) Color(0xFFFB7185) else Color(0xFFD9254C)
+    val expenseActiveBg = if (isDarkMode) Color(0xFF3A1A2A) else Color(0xFFFDF0F2)
+    val incomeActiveBg = if (isDarkMode) Color(0xFF1A3A2A) else Color(0xFFE8F8EE)
+
+    var type by remember { mutableStateOf("expense") } // "expense" or "income"
+    var amountText by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf(envelopes.firstOrNull()?.id ?: "needs") }
+    var descriptionText by remember { mutableStateOf("") }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = cardBg,
+        dragHandle = { BottomSheetDefaults.DragHandle(color = textSecondary) }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 24.dp, bottom = 48.dp, top = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text("Record Transaction", color = textPrimary, fontWeight = FontWeight.Black, fontSize = 20.sp)
+            
+            // Type toggle using TabRow style
+            TabRow(
+                selectedTabIndex = if (type == "expense") 0 else 1,
+                containerColor = innerBoxBg,
+                contentColor = textPrimary,
+                indicator = { },
+                divider = { },
+                modifier = Modifier.clip(RoundedCornerShape(AppSpacing.base))
+            ) {
+                Tab(
+                    selected = type == "expense",
+                    onClick = { type = "expense" },
+                    modifier = Modifier
+                        .padding(AppSpacing.micro)
+                        .clip(RoundedCornerShape(AppSpacing.base))
+                        .background(if (type == "expense") expenseActiveBg else Color.Transparent)
+                ) {
+                    Text(
+                        "Expense",
+                        color = if (type == "expense") expenseColor else textSecondary,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = AppSpacing.compact)
+                    )
+                }
+                Tab(
+                    selected = type == "income",
+                    onClick = { type = "income" },
+                    modifier = Modifier
+                        .padding(AppSpacing.micro)
+                        .clip(RoundedCornerShape(AppSpacing.base))
+                        .background(if (type == "income") incomeActiveBg else Color.Transparent)
+                ) {
+                    Text(
+                        "Income",
+                        color = if (type == "income") incomeColor else textSecondary,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = AppSpacing.compact)
+                    )
+                }
+            }
+
+            // Amount field
+            Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.base)) {
+                Text("AMOUNT (RP)", color = textSecondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                OutlinedTextField(
+                    value = amountText,
+                    onValueChange = { amountText = it.filter { c -> c.isDigit() } },
+                    placeholder = { Text("0", color = textSecondary) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(AppSpacing.base),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = innerBoxBg,
+                        unfocusedContainerColor = innerBoxBg,
+                        focusedTextColor = textPrimary,
+                        unfocusedTextColor = textPrimary,
+                        focusedBorderColor = GoldAccent,
+                        unfocusedBorderColor = inputBorder
+                    )
+                )
+            }
+
+            // Category selection if expense
+            if (type == "expense") {
+                Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.base)) {
+                    Text("CATEGORY ENVELOPE", color = textSecondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(AppSpacing.base)) {
+                        items(envelopes) { env ->
+                            val isSelected = selectedCategory == env.id
+                            val envColor = parseHexColor(env.colorHex)
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = { selectedCategory = env.id },
+                                label = { Text(env.name, fontWeight = FontWeight.Bold) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = envColor.copy(alpha = 0.2f),
+                                    selectedLabelColor = envColor,
+                                    labelColor = textSecondary
+                                ),
+                                border = FilterChipDefaults.filterChipBorder(
+                                    borderColor = inputBorder,
+                                    selectedBorderColor = envColor,
+                                    enabled = true,
+                                    selected = isSelected
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Description
+            Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.base)) {
+                Text("DESCRIPTION", color = textSecondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                OutlinedTextField(
+                    value = descriptionText,
+                    onValueChange = { descriptionText = it },
+                    placeholder = { Text("Lunch, Coffee, Salary...", color = textSecondary) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(AppSpacing.base),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = innerBoxBg,
+                        unfocusedContainerColor = innerBoxBg,
+                        focusedTextColor = textPrimary,
+                        unfocusedTextColor = textPrimary,
+                        focusedBorderColor = GoldAccent,
+                        unfocusedBorderColor = inputBorder
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Submit Button
+            Button(
+                onClick = {
+                    val amt = amountText.toDoubleOrNull() ?: 0.0
+                    if (amt > 0) {
+                        val cat = if (type == "expense") selectedCategory else "income"
+                        viewModel.addTransaction(type, amt, cat, descriptionText)
+                        onDismiss()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().height(AppSpacing.touchTarget),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (type == "expense") expenseColor else incomeColor
+                ),
+                shape = RoundedCornerShape(AppSpacing.standard)
+            ) {
+                Text(
+                    "Record Transaction",
+                    color = Color.White,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 16.sp
+                )
+            }
+        }
     }
 }

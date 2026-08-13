@@ -1015,95 +1015,97 @@ fun SettingsModal(
                     ) {
                         Column {
                             // Theme Row
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = if (isDarkMode) Icons.Default.DarkMode else Icons.Default.LightMode,
-                                        contentDescription = "Theme",
-                                        tint = if (isThemeCustomized) (if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A)) else (if (isDarkMode) Color(0xFFA29BFE) else Color(0xFF6C5CE7)),
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Column {
-                                        Text("Theme Mode", color = if (isDarkMode) Color.White else Color(0xFF121926), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                                        if (isThemeCustomized) {
-                                            Text("Disabled (Custom active)", color = Color(0xFFFB7185), fontSize = 10.sp)
+                            if (!hasPremium || isThemeCustomized) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = if (isDarkMode) Icons.Default.DarkMode else Icons.Default.LightMode,
+                                            contentDescription = "Theme",
+                                            tint = if (isThemeCustomized) (if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A)) else (if (isDarkMode) Color(0xFFA29BFE) else Color(0xFF6C5CE7)),
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(16.dp))
+                                        Column {
+                                            Text("Theme Mode", color = if (isDarkMode) Color.White else Color(0xFF121926), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                                            if (isThemeCustomized) {
+                                                Text("Disabled (Custom active)", color = Color(0xFFFB7185), fontSize = 10.sp)
+                                            }
                                         }
                                     }
-                                }
 
-                                if (isThemeCustomized) {
-                                    Surface(
-                                        shape = RoundedCornerShape(16.dp),
-                                        color = if (isDarkMode) Color(0xFF282436) else Color(0xFFE2E8F0),
-                                        border = BorderStroke(1.dp, if (isDarkMode) Color(0xFF38334A) else Color(0xFFCBD5E1))
-                                    ) {
+                                    if (isThemeCustomized) {
+                                        Surface(
+                                            shape = RoundedCornerShape(16.dp),
+                                            color = if (isDarkMode) Color(0xFF282436) else Color(0xFFE2E8F0),
+                                            border = BorderStroke(1.dp, if (isDarkMode) Color(0xFF38334A) else Color(0xFFCBD5E1))
+                                        ) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .clickable { onResetCustomization() }
+                                                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = "Custom",
+                                                    color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A),
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Spacer(modifier = Modifier.width(4.dp))
+                                                Text(
+                                                    text = "Reset",
+                                                    color = GoldAccent,
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+                                    } else {
                                         Row(
                                             modifier = Modifier
-                                                .clickable { onResetCustomization() }
-                                                .padding(horizontal = 8.dp, vertical = 8.dp),
-                                            verticalAlignment = Alignment.CenterVertically
+                                                .clip(RoundedCornerShape(16.dp))
+                                                .background(if (isDarkMode) Color(0xFF282436) else Color(0xFFE2E8F0))
+                                                .padding(4.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(2.dp)
                                         ) {
-                                            Text(
-                                                text = "Custom",
-                                                color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A),
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text(
-                                                text = "Reset",
-                                                color = GoldAccent,
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        }
-                                    }
-                                } else {
-                                    Row(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(16.dp))
-                                            .background(if (isDarkMode) Color(0xFF282436) else Color(0xFFE2E8F0))
-                                            .padding(4.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                    ) {
-                                        Surface(
-                                            shape = RoundedCornerShape(8.dp),
-                                            color = if (isDarkMode) GoldAccent else Color.Transparent,
-                                            modifier = Modifier.clickable { onToggleTheme(true) }
-                                        ) {
-                                            Text(
-                                                text = "Dark",
-                                                color = if (isDarkMode) Color.White else Color(0xFF5A667A),
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                            )
-                                        }
-                                        Surface(
-                                            shape = RoundedCornerShape(8.dp),
-                                            color = if (!isDarkMode) GoldAccent else Color.Transparent,
-                                            modifier = Modifier.clickable { onToggleTheme(false) }
-                                        ) {
-                                            Text(
-                                                text = "Light",
-                                                color = if (!isDarkMode) Color.White else Color(0xFF9CA3AF),
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                            )
+                                            Surface(
+                                                shape = RoundedCornerShape(8.dp),
+                                                color = if (isDarkMode) GoldAccent else Color.Transparent,
+                                                modifier = Modifier.clickable { onToggleTheme(true) }
+                                            ) {
+                                                Text(
+                                                    text = "Dark",
+                                                    color = if (isDarkMode) Color.White else Color(0xFF5A667A),
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                                )
+                                            }
+                                            Surface(
+                                                shape = RoundedCornerShape(8.dp),
+                                                color = if (!isDarkMode) GoldAccent else Color.Transparent,
+                                                modifier = Modifier.clickable { onToggleTheme(false) }
+                                            ) {
+                                                Text(
+                                                    text = "Light",
+                                                    color = if (!isDarkMode) Color.White else Color(0xFF9CA3AF),
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            Divider(color = if (isDarkMode) Color(0xFF282436) else Color(0xFFE2E8F0))
+                                Divider(color = if (isDarkMode) Color(0xFF282436) else Color(0xFFE2E8F0))
+                            }
 
                             // Daily Reminder Row
                             // Currency Row
