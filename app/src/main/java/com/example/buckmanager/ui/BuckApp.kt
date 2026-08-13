@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.List
@@ -131,15 +132,15 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                             Surface(
                                 modifier = Modifier
                                     .height(58.dp)
-                                    .clip(RoundedCornerShape(16.dp))
                                     .border(
                                         1.dp,
                                         navBorder,
                                         RoundedCornerShape(16.dp)
                                     ),
+                                shape = RoundedCornerShape(16.dp),
                                 color = navBg,
                                 tonalElevation = 0.dp,
-                                shadowElevation = 8.dp
+                                shadowElevation = 0.dp
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -177,7 +178,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                                         }
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Filled.List,
+                                            imageVector = Icons.Filled.History,
                                             contentDescription = "Transactions",
                                             tint = if (currentRoute == "transactions") activeTint else unselectedTint,
                                             modifier = Modifier.size(28.dp)
