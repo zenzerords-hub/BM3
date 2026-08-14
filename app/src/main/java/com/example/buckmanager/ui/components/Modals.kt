@@ -634,6 +634,7 @@ fun SettingsModal(
     monetization: MonetizationState,
     isDarkMode: Boolean = true,
     isThemeCustomized: Boolean = false,
+    isCustomizationLocked: Boolean = true,
     onDismiss: () -> Unit,
     onToggleNotification: (Boolean) -> Unit,
     onToggleTheme: (Boolean) -> Unit = {},
@@ -1042,8 +1043,9 @@ fun SettingsModal(
                     ) {
                         Column {
                             // Theme Row
-                            val hasPremium = monetization.isPremium
-                            if (!hasPremium || isThemeCustomized) {
+                            val isCustomUnlocked = !isCustomizationLocked
+                            
+                            if (!isCustomUnlocked || isThemeCustomized) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()

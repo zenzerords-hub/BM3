@@ -93,6 +93,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
         val notificationEnabled by viewModel.notificationEnabled.collectAsState()
         val isDarkMode by viewModel.isDarkMode.collectAsState()
         val isThemeCustomized by viewModel.isThemeCustomized.collectAsState()
+        val isCustomizationLocked by viewModel.isCustomizationLocked.collectAsState()
         val userNotice by viewModel.userNotice.collectAsState()
 
         var displayedNotice by remember { mutableStateOf<String?>(null) }
@@ -265,6 +266,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                 monetization = monetization,
                 isDarkMode = isDarkMode,
                 isThemeCustomized = isThemeCustomized,
+                isCustomizationLocked = isCustomizationLocked,
                 onDismiss = { showSettings = false },
                 onToggleNotification = { viewModel.toggleNotification(it) },
                 onToggleTheme = { viewModel.toggleThemeMode(it) },
