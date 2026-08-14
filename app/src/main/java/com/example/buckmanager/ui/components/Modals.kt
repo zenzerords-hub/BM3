@@ -659,19 +659,9 @@ fun SettingsModal(
     var showRestoreDialog by remember { mutableStateOf(false) }
     var restoreInputText by remember { mutableStateOf("") }
 
-    var showShareCustomizationDialog by remember { mutableStateOf(false) }
     var showCurrencyModal by remember { mutableStateOf(false) }
-
-    val exportJsonLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json")
-    ) { uri ->
-        if (uri != null) {
-            onExportJson(uri)
-        }
-    }
-    var customizationJsonText by remember { mutableStateOf("") }
-    var customizationInputText by remember { mutableStateOf("") }
     
+
     var statusMessage by remember { mutableStateOf<String?>(null) }
 
     // Full Screen Overlay & Drawer Panel
@@ -710,7 +700,7 @@ fun SettingsModal(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 24.dp, vertical = 24.dp)
+                    .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp)
             ) {
                 // Drawer Header
                 Row(
@@ -818,6 +808,39 @@ fun SettingsModal(
                                 text = userEmail ?: "Local Offline Session",
                                 color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A),
                                 fontSize = 12.sp
+                            )
+                        }
+                    }
+
+                    // Sign Out / In Row
+                    Surface(
+                        onClick = {
+                            if (userEmail != null) onLogoutClick() else onLoginClick()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        color = Color.Transparent,
+                        border = BorderStroke(1.dp, if (isDarkMode) Color(0xFF282436) else Color(0xFFE2E8F0))
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = if (userEmail != null) Icons.Default.ExitToApp else Icons.Default.Login,
+                                contentDescription = "Sign Out",
+                                tint = if (userEmail != null) Color(0xFFFB7185) else GoldAccent,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = if (userEmail != null) "Sign Out" else "Sign In with Google",
+                                color = if (userEmail != null) Color(0xFFFB7185) else GoldAccent,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
@@ -931,101 +954,7 @@ fun SettingsModal(
                         }
                     }
 
-                    // Local Snapshot Card
-                    Surface(
-                        onClick = {
-                            onCreateSnapshot()
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = if (isDarkMode) Color(0xFF1C1929) else Color(0xFFF4F5F9)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(Color(0xFF00B894).copy(alpha = 0.15f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Save,
-                                    contentDescription = "Create Snapshot",
-                                    tint = if (isDarkMode) Color(0xFF55EFC4) else Color(0xFF00B894),
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
 
-                            Spacer(modifier = Modifier.width(16.dp))
-
-                            Column {
-                                Text(
-                                    text = "Create Local Snapshot",
-                                    color = if (isDarkMode) Color.White else Color(0xFF121926),
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "Save database to app storage",
-                                    color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A),
-                                    fontSize = 11.sp
-                                )
-                            }
-                        }
-                    }
-
-                    // Export JSON Card
-                    Surface(
-                        onClick = {
-                            exportJsonLauncher.launch("buckmanager_export.json")
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = if (isDarkMode) Color(0xFF1C1929) else Color(0xFFF4F5F9)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(Color(0xFF0984E3).copy(alpha = 0.15f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Download,
-                                    contentDescription = "Export JSON",
-                                    tint = if (isDarkMode) Color(0xFF74B9FF) else Color(0xFF0984E3),
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(16.dp))
-
-                            Column {
-                                Text(
-                                    text = "Export to JSON",
-                                    color = if (isDarkMode) Color.White else Color(0xFF121926),
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "Save data to Downloads folder",
-                                    color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A),
-                                    fontSize = 11.sp
-                                )
-                            }
-                        }
-                    }
 
                     // 4. SETTINGS
                     Text(
@@ -1170,110 +1099,6 @@ fun SettingsModal(
                                     )
                                 }
                             }
-                            Divider(color = if (isDarkMode) Color(0xFF282436) else Color(0xFFE2E8F0))
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Notifications,
-                                        contentDescription = "Daily Reminder",
-                                        tint = GoldAccent,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Column {
-                                        Text("Daily Reminder", color = if (isDarkMode) Color.White else Color(0xFF121926), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                                        Text("Jam 8 malam", color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A), fontSize = 11.sp)
-                                    }
-                                }
-
-                                Switch(
-                                    checked = notificationEnabled,
-                                    onCheckedChange = onToggleNotification,
-                                    colors = SwitchDefaults.colors(
-                                        checkedThumbColor = Color.White,
-                                        checkedTrackColor = GoldAccent,
-                                        uncheckedThumbColor = if (isDarkMode) Color(0xFF8C98B2) else Color(0xFF94A3B8),
-                                        uncheckedTrackColor = if (isDarkMode) Color(0xFF1E293B) else Color(0xFFE2E8F0)
-                                    )
-                                )
-                            }
-
-
-
-                            // Share / Import Customization Theme Code Row
-                            Surface(
-                                onClick = {
-                                    customizationJsonText = onExportCustomization()
-                                    customizationInputText = ""
-                                    showShareCustomizationDialog = true
-                                },
-                                color = Color.Transparent
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.Share,
-                                            contentDescription = "Share / Import Theme",
-                                            tint = GoldAccent,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(16.dp))
-                                        Column {
-                                            Text("Import & Export Theme Code", color = if (isDarkMode) Color.White else Color(0xFF121926), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                                            Text("Bagikan atau paste kode tema JSON", color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A), fontSize = 11.sp)
-                                        }
-                                    }
-
-                                    Icon(
-                                        imageVector = Icons.Default.ChevronRight,
-                                        contentDescription = null,
-                                        tint = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A)
-                                    )
-                                }
-                            }
-
-                            Divider(color = if (isDarkMode) Color(0xFF282436) else Color(0xFFE2E8F0))
-
-                            // Sign Out / In Row
-                            Surface(
-                                onClick = {
-                                    if (userEmail != null) onLogoutClick() else onLoginClick()
-                                },
-                                color = Color.Transparent
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = if (userEmail != null) Icons.Default.ExitToApp else Icons.Default.Login,
-                                        contentDescription = "Sign Out",
-                                        tint = if (userEmail != null) Color(0xFFFB7185) else GoldAccent,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Text(
-                                        text = if (userEmail != null) "Sign Out" else "Sign In with Google",
-                                        color = if (userEmail != null) Color(0xFFFB7185) else GoldAccent,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
                         }
                     }
 
@@ -1392,70 +1217,7 @@ fun SettingsModal(
         )
     }
 
-    // SHARE / IMPORT CUSTOMIZATION DIALOG
-    if (showShareCustomizationDialog) {
-        AlertDialog(
-            onDismissRequest = { showShareCustomizationDialog = false },
-            containerColor = dialogContainer,
-            title = { Text("🎨 Custom Theme Share & Import", color = dialogTitleColor, fontWeight = FontWeight.Bold) },
-            text = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text("1. Export Current Theme:", color = GoldAccent, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                    Button(
-                        onClick = {
-                            clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(customizationJsonText))
-                            statusMessage = "Theme code copied to clipboard!"
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = GoldAccent)
-                    ) {
-                        Text("Copy Theme Code to Share", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                    }
 
-                    Divider(color = dialogBorderColor)
-
-                    Text("2. Import External Theme Code:", color = GoldAccent, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                    OutlinedTextField(
-                        value = customizationInputText,
-                        onValueChange = { customizationInputText = it },
-                        placeholder = { Text("Paste theme code here...", color = dialogSubtitleColor) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(96.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = dialogTitleColor,
-                            unfocusedTextColor = dialogTitleColor,
-                            focusedBorderColor = GoldAccent,
-                            unfocusedBorderColor = dialogBorderColor
-                        )
-                    )
-
-                    Button(
-                        onClick = {
-                            if (customizationInputText.isNotBlank()) {
-                                onImportCustomization(customizationInputText) { success, msg ->
-                                    statusMessage = msg
-                                    if (success) showShareCustomizationDialog = false
-                                }
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = if (isDarkMode) Color.White else Color(0xFF121926))
-                    ) {
-                        Text("Apply Theme Code", color = if (isDarkMode) Color.Black else Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showShareCustomizationDialog = false }) {
-                    Text("Close", color = dialogSubtitleColor)
-                }
-            }
-        )
-    }
     CurrencyModal(
         visible = showCurrencyModal,
         isDarkMode = isDarkMode,
