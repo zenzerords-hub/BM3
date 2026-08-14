@@ -102,6 +102,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
         val envelopes by viewModel.envelopes.collectAsState()
         val monetization by viewModel.monetization.collectAsState()
         val notificationEnabled by viewModel.notificationEnabled.collectAsState()
+        val lastBackupDate by viewModel.lastBackupDate.collectAsState()
         val isDarkMode by viewModel.isDarkMode.collectAsState()
         val isThemeCustomized by viewModel.isThemeCustomized.collectAsState()
         val isCustomizationLocked by viewModel.isCustomizationLocked.collectAsState()
@@ -274,6 +275,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                 notificationEnabled = notificationEnabled,
                 userEmail = userEmail,
                 userProfilePicUrl = userProfilePicUrl,
+                lastBackupDate = lastBackupDate,
                 monetization = monetization,
                 isDarkMode = isDarkMode,
                 isThemeCustomized = isThemeCustomized,

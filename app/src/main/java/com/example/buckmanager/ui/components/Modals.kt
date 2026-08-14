@@ -631,6 +631,7 @@ fun SettingsModal(
     notificationEnabled: Boolean,
     userEmail: String?,
     userProfilePicUrl: String?,
+    lastBackupDate: String?,
     monetization: MonetizationState,
     isDarkMode: Boolean = true,
     isThemeCustomized: Boolean = false,
@@ -651,9 +652,6 @@ fun SettingsModal(
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     var showCurrencyModal by remember { mutableStateOf(false) }
-    
-
-    var statusMessage by remember { mutableStateOf<String?>(null) }
 
     // Full Screen Overlay & Drawer Panel
     Box(modifier = Modifier.fillMaxSize()) {
@@ -850,9 +848,9 @@ fun SettingsModal(
                     // Backup Card
                     Surface(
                         onClick = {
-                            statusMessage = "Starting backup..."
+                            android.widget.Toast.makeText(context, "Starting backup...", android.widget.Toast.LENGTH_SHORT).show()
                             onBackupData(context) { success, msg, intent ->
-                                statusMessage = msg
+                                android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_LONG).show()
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -890,7 +888,7 @@ fun SettingsModal(
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = "Last backup: Today 8:31 PM",
+                                    text = "Last backup: ${lastBackupDate ?: "Never"}",
                                     color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A),
                                     fontSize = 11.sp
                                 )
@@ -901,9 +899,9 @@ fun SettingsModal(
                     // Restore Card
                     Surface(
                         onClick = {
-                            statusMessage = "Starting restore..."
+                            android.widget.Toast.makeText(context, "Starting restore...", android.widget.Toast.LENGTH_SHORT).show()
                             onRestoreData(context) { success, msg, intent ->
-                                statusMessage = msg
+                                android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_LONG).show()
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -1097,14 +1095,7 @@ fun SettingsModal(
                         }
                     }
 
-                    if (statusMessage != null) {
-                        Text(
-                            text = statusMessage!!,
-                            color = GoldAccent,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+
 
                     Spacer(modifier = Modifier.height(24.dp))
                 }

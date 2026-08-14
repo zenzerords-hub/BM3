@@ -105,6 +105,9 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
     private val _notificationEnabled = MutableStateFlow(true)
     val notificationEnabled: StateFlow<Boolean> = _notificationEnabled.asStateFlow()
 
+    private val _lastBackupDate = MutableStateFlow<String?>(null)
+    val lastBackupDate: StateFlow<String?> = _lastBackupDate.asStateFlow()
+
     private val _userEmail = MutableStateFlow<String?>(null)
     val userEmail: StateFlow<String?> = _userEmail.asStateFlow()
 
@@ -211,6 +214,7 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
             _notificationEnabled.value = settings["notification_enabled"]?.toBoolean() ?: true
             _isDarkMode.value = (settings["app_theme_mode"] ?: "light") == "dark"
             _isThemeCustomized.value = settings["is_theme_customized"]?.toBoolean() ?: false
+            _lastBackupDate.value = settings["last_backup_date"]
             
             if (!_isThemeCustomized.value) {
                 applyThemePreset(_isDarkMode.value)
@@ -644,6 +648,9 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
                 
                 val success = driveServiceHelper.uploadBackup(zipFile)
                 if (success) {
+                    val dateStr = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.US).format(Date())
+                    saveSetting("last_backup_date", dateStr)
+                    _lastBackupDate.value = dateStr
                     onResult(true, "Data successfully backed up to Google Drive!", null)
                 } else {
                     onResult(false, "Failed to upload backup.", null)
@@ -652,7 +659,7 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
                 onResult(false, "Authorization required.", e.intent)
             } catch (e: Exception) {
                 e.printStackTrace()
-                onResult(false, "An error occurred during backup.", null)
+                onResult(false, "Error: ${e.message ?: "Failed to upload backup."}", null)
             }
         }
     }
