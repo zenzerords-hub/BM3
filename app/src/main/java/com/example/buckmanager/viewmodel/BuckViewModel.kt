@@ -726,7 +726,7 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
                 onResult(false, "Authorization required.", e.intent)
             } catch (e: Exception) {
                 e.printStackTrace()
-                onResult(false, "Invalid backup format or corrupt data.", null)
+                onResult(false, "Error: ${e.message ?: "Invalid backup format or corrupt data."}", null)
             }
         }
     }
