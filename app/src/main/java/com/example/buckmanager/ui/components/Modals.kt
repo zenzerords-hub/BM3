@@ -642,23 +642,14 @@ fun SettingsModal(
     onUnlockCustomization: () -> Unit,
     onLoginClick: () -> Unit,
     onLogoutClick: () -> Unit,
-    onBackupData: () -> String,
-    onRestoreData: (String, (Boolean, String) -> Unit) -> Unit,
-    onExportCustomization: () -> String,
-    onImportCustomization: (String, (Boolean, String) -> Unit) -> Unit,
+    onBackupData: (android.content.Context, (Boolean, String, android.content.Intent?) -> Unit) -> Unit,
+    onRestoreData: (android.content.Context, (Boolean, String, android.content.Intent?) -> Unit) -> Unit,
     onOpenCustomizeWidget: () -> Unit = {},
     onCurrencyChanged: () -> Unit = {},
     onCreateSnapshot: () -> Unit = {},
     onExportJson: (android.net.Uri) -> Unit = {}
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
-    var showBackupDialog by remember { mutableStateOf(false) }
-    var backupJsonText by remember { mutableStateOf("") }
-
-    var showRestoreDialog by remember { mutableStateOf(false) }
-    var restoreInputText by remember { mutableStateOf("") }
-
     var showCurrencyModal by remember { mutableStateOf(false) }
     
 
@@ -859,8 +850,10 @@ fun SettingsModal(
                     // Backup Card
                     Surface(
                         onClick = {
-                            backupJsonText = onBackupData()
-                            showBackupDialog = true
+                            statusMessage = "Starting backup..."
+                            onBackupData(context) { success, msg, intent ->
+                                statusMessage = msg
+                            }
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
@@ -908,8 +901,10 @@ fun SettingsModal(
                     // Restore Card
                     Surface(
                         onClick = {
-                            restoreInputText = ""
-                            showRestoreDialog = true
+                            statusMessage = "Starting restore..."
+                            onRestoreData(context) { success, msg, intent ->
+                                statusMessage = msg
+                            }
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
@@ -946,7 +941,7 @@ fun SettingsModal(
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = "Overwrite from Drive / JSON",
+                                    text = "Restore from Drive",
                                     color = if (isDarkMode) Color(0xFF9CA3AF) else Color(0xFF5A667A),
                                     fontSize = 11.sp
                                 )

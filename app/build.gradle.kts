@@ -107,6 +107,7 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")

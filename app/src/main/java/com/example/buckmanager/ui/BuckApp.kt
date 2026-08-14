@@ -61,6 +61,17 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route ?: startDestination
 
+        val driveAuthLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+            contract = androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                // The user granted permission, the operation should be retried by the user
+                android.widget.Toast.makeText(context, "Permission granted. Please try again.", android.widget.Toast.LENGTH_SHORT).show()
+            } else {
+                android.widget.Toast.makeText(context, "Google Drive permission denied.", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+
         val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
         DisposableEffect(lifecycleOwner) {
             val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
@@ -284,10 +295,18 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                onBackupData = { viewModel.backupData() },
-                onRestoreData = { jsonText, onRes -> viewModel.restoreData(jsonText, onRes) },
-                onExportCustomization = { viewModel.exportCustomizationJson() },
-                onImportCustomization = { jsonText, onRes -> viewModel.importCustomizationJson(jsonText, onRes) },
+                onBackupData = { ctx, onRes ->
+                    viewModel.backupDataToDrive(ctx) { success, msg, intent ->
+                        onRes(success, msg, intent)
+                        intent?.let { driveAuthLauncher.launch(it) }
+                    }
+                },
+                onRestoreData = { ctx, onRes ->
+                    viewModel.restoreDataFromDrive(ctx) { success, msg, intent ->
+                        onRes(success, msg, intent)
+                        intent?.let { driveAuthLauncher.launch(it) }
+                    }
+                },
                 onOpenCustomizeWidget = {
                     showSettings = false
                 },
