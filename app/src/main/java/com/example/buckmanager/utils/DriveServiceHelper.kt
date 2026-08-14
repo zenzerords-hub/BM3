@@ -1,10 +1,10 @@
 package com.example.buckmanager.utils
 
 import android.content.Context
-import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.client.http.FileContent
+import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
@@ -84,7 +84,7 @@ class DriveServiceHelper(private val driveService: Drive) {
             credential.selectedAccountName = accountName
             
             val googleDriveService = Drive.Builder(
-                AndroidHttp.newCompatibleTransport(),
+                NetHttpTransport(),
                 GsonFactory.getDefaultInstance(),
                 credential
             )
