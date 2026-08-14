@@ -225,12 +225,6 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                                 navController.navigate("dashboard") {
                                     popUpTo("login") { inclusive = true }
                                 }
-                            },
-                            onContinueAsGuest = {
-                                viewModel.setUserEmail("guest@buckmanager.local")
-                                navController.navigate("dashboard") {
-                                    popUpTo("login") { inclusive = true }
-                                }
                             }
                         )
                     }

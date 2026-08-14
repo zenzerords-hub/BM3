@@ -30,8 +30,7 @@ import com.example.buckmanager.ui.GoldAccent
 @Composable
 fun LoginScreen(
     isDarkMode: Boolean,
-    onLoginSuccess: (email: String) -> Unit,
-    onContinueAsGuest: () -> Unit
+    onLoginSuccess: (email: String) -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -105,12 +104,8 @@ fun LoginScreen(
                 onClick = {
                     coroutineScope.launch {
                         try {
-                            val webClientId = BuildConfig.GOOGLE_WEB_CLIENT_ID
-                            if (webClientId == "YOUR_GOOGLE_WEB_CLIENT_ID" || webClientId.isEmpty()) {
-                                // Fallback for prototype testing if no Web Client ID is configured
-                                onLoginSuccess("zen.zero.rds@gmail.com")
-                                return@launch
-                            }
+                            val webClientId = "948917297322-hb3megjq0rklkftk034gnsjii6pd7il4.apps.googleusercontent.com"
+
                             val googleIdOption = GetGoogleIdOption.Builder()
                                 .setFilterByAuthorizedAccounts(false)
                                 .setServerClientId(webClientId)
@@ -160,20 +155,6 @@ fun LoginScreen(
                         fontWeight = FontWeight.Bold
                     )
                 }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Guest option
-            TextButton(
-                onClick = onContinueAsGuest
-            ) {
-                Text(
-                    text = "Continue as Guest",
-                    color = guestTextColor,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium
-                )
             }
 
             Spacer(modifier = Modifier.weight(1f))
