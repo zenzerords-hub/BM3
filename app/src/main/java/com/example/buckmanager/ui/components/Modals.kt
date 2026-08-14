@@ -630,6 +630,7 @@ fun SettingsModal(
     visible: Boolean,
     notificationEnabled: Boolean,
     userEmail: String?,
+    userProfilePicUrl: String?,
     monetization: MonetizationState,
     isDarkMode: Boolean = true,
     isThemeCustomized: Boolean = false,
@@ -770,12 +771,21 @@ fun SettingsModal(
                                     .background(if (isDarkMode) Color(0xFF2B263B) else Color(0xFFE2E8F0)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = if (userEmail != null) userEmail.take(1).uppercase() else "G",
-                                    color = GoldAccent,
-                                    fontSize = 32.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                if (userProfilePicUrl != null) {
+                                    AsyncImage(
+                                        model = userProfilePicUrl,
+                                        contentDescription = "Profile Picture",
+                                        modifier = Modifier.fillMaxSize().clip(CircleShape),
+                                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                    )
+                                } else {
+                                    Text(
+                                        text = if (userEmail != null) userEmail.take(1).uppercase() else "G",
+                                        color = GoldAccent,
+                                        fontSize = 32.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))

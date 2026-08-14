@@ -53,6 +53,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
         val context = androidx.compose.ui.platform.LocalContext.current
         val navController = rememberNavController()
         val userEmail by viewModel.userEmail.collectAsState()
+        val userProfilePicUrl by viewModel.userProfilePicUrl.collectAsState()
         val hasSeenOnboarding by viewModel.hasSeenOnboarding.collectAsState()
 
         val startDestination = if (!hasSeenOnboarding) "onboarding" else if (userEmail == null) "login" else "dashboard"
@@ -220,8 +221,9 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                     composable("login") {
                         LoginScreen(
                             isDarkMode = isDarkMode,
-                            onLoginSuccess = { email ->
+                            onLoginSuccess = { email, profilePicUrl ->
                                 viewModel.setUserEmail(email)
+                                viewModel.setUserProfilePicUrl(profilePicUrl)
                                 navController.navigate("dashboard") {
                                     popUpTo("login") { inclusive = true }
                                 }
@@ -259,6 +261,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                 visible = showSettings,
                 notificationEnabled = notificationEnabled,
                 userEmail = userEmail,
+                userProfilePicUrl = userProfilePicUrl,
                 monetization = monetization,
                 isDarkMode = isDarkMode,
                 isThemeCustomized = isThemeCustomized,
@@ -273,6 +276,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                 },
                 onLogoutClick = {
                     viewModel.setUserEmail(null)
+                    viewModel.setUserProfilePicUrl(null)
                     showSettings = false
                     navController.navigate("login") {
                         popUpTo(0) { inclusive = true }

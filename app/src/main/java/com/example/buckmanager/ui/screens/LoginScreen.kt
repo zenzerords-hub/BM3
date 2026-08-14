@@ -30,7 +30,7 @@ import com.example.buckmanager.ui.GoldAccent
 @Composable
 fun LoginScreen(
     isDarkMode: Boolean,
-    onLoginSuccess: (email: String) -> Unit
+    onLoginSuccess: (email: String, profilePicUrl: String?) -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -121,7 +121,7 @@ fun LoginScreen(
 
                             if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                                 val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                                onLoginSuccess(googleIdTokenCredential.id)
+                                onLoginSuccess(googleIdTokenCredential.id, googleIdTokenCredential.profilePictureUri?.toString())
                             }
                         } catch (e: Exception) {
                             Log.e("LoginScreen", "Google sign in failed", e)

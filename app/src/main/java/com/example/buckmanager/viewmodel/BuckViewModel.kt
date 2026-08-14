@@ -108,6 +108,9 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
     private val _userEmail = MutableStateFlow<String?>(null)
     val userEmail: StateFlow<String?> = _userEmail.asStateFlow()
 
+    private val _userProfilePicUrl = MutableStateFlow<String?>(null)
+    val userProfilePicUrl: StateFlow<String?> = _userProfilePicUrl.asStateFlow()
+
     private val _isDarkMode = MutableStateFlow(false)
     val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
 
@@ -202,8 +205,9 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
 
 
 
-            // User Email
+            // User Email and Profile Pic
             _userEmail.value = settings["user_email"]
+            _userProfilePicUrl.value = settings["user_profile_pic"]
             _notificationEnabled.value = settings["notification_enabled"]?.toBoolean() ?: true
             _isDarkMode.value = (settings["app_theme_mode"] ?: "light") == "dark"
             _isThemeCustomized.value = settings["is_theme_customized"]?.toBoolean() ?: false
@@ -597,6 +601,17 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
                 saveSetting("user_email", email)
             } else {
                 db.settingDao().deleteSetting("user_email")
+            }
+        }
+    }
+
+    fun setUserProfilePicUrl(url: String?) {
+        _userProfilePicUrl.value = url
+        viewModelScope.launch(Dispatchers.IO) {
+            if (url != null) {
+                saveSetting("user_profile_pic", url)
+            } else {
+                db.settingDao().deleteSetting("user_profile_pic")
             }
         }
     }
