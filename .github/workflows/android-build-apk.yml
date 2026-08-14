@@ -40,6 +40,10 @@ jobs:
         with:
           gradle-version: '9.3.1'
 
+      - name: Print Keystore SHA-1
+        run: |
+          keytool -list -v -keystore debug.keystore -alias androiddebugkey -storepass android -keypass android | grep "SHA1:"
+
       - name: Build Debug APK
         run: gradle assembleDebug
 
