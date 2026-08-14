@@ -35,6 +35,7 @@ fun LoginScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val credentialManager = remember { CredentialManager.create(context) }
+    var isLoading by remember { mutableStateOf(false) }
     
     val bgColor = if (isDarkMode) Color(0xFF0D0C14) else Color(0xFFF8FAFC)
     val titleColor = if (isDarkMode) Color.White else Color(0xFF0F172A)
@@ -102,6 +103,8 @@ fun LoginScreen(
             // Continue with Google Button
             Surface(
                 onClick = {
+                    if (isLoading) return@Surface
+                    isLoading = true
                     coroutineScope.launch {
                         try {
                             val webClientId = "948917297322-hb3megjq0rklkftk034gnsjii6pd7il4.apps.googleusercontent.com"
@@ -126,6 +129,8 @@ fun LoginScreen(
                         } catch (e: Exception) {
                             Log.e("LoginScreen", "Google sign in failed", e)
                             // Do not auto-login on failure — user must retry or use guest mode
+                        } finally {
+                            isLoading = false
                         }
                     }
                 },
@@ -141,19 +146,34 @@ fun LoginScreen(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Language,
-                        contentDescription = "Google Sign In",
-                        tint = Color(0xFF388E3C),
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = "Continue with Google",
-                        color = btnTextColor,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = if (isDarkMode) Color.White else Color(0xFF0F172A),
+                            strokeWidth = 2.5.dp
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = "Connecting to Google...",
+                            color = btnTextColor,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Language,
+                            contentDescription = "Google Sign In",
+                            tint = Color(0xFF388E3C),
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = "Continue with Google",
+                            color = btnTextColor,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
 
