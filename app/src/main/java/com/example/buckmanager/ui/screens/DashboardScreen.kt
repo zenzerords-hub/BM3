@@ -657,7 +657,9 @@ fun DashboardScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        val indicatorColor = if (totalPercentage == 100) Color(0xFF34D399) else Color(0xFFFCBF36)
+                        val mainEnv = envelopes.find { it.id == "main" }
+                        val bufferPct = mainEnv?.percentage ?: 0
+                        val indicatorColor = if (bufferPct > 0) Color(0xFF34D399) else Color(0xFFFCBF36)
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
@@ -665,7 +667,7 @@ fun DashboardScreen(
                                 .background(indicatorColor)
                         )
                         Text(
-                            text = if (totalPercentage == 100) "100% Allocated ✓" else "${totalPercentage}% Allocated — ${100 - totalPercentage}% Unallocated",
+                            text = if (bufferPct > 0) "Main (Buffer): $bufferPct%" else "100% Allocated (No Buffer)",
                             color = indicatorColor,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 11.sp
@@ -770,51 +772,53 @@ fun DashboardScreen(
                             )
                         }
 
-                        // Allocation Slider
-                        @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-                        androidx.compose.material3.Slider(
-                            value = env.percentage.toFloat(),
-                            onValueChange = { newValue ->
-                                viewModel.updateEnvelope(env.copy(percentage = newValue.toInt()))
-                            },
-                            valueRange = 0f..100f,
-                            steps = 99,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = env.paddingLeft.dp, vertical = 0.dp)
-                                .padding(bottom = 8.dp),
-                            thumb = {
-                                Box(
-                                    modifier = Modifier
-                                        .size(16.dp)
-                                        .background(parseHexColor(env.colorHex), androidx.compose.foundation.shape.CircleShape)
-                                )
-                            },
-                            track = {
-                                val fraction = env.percentage.toFloat() / 100f
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(4.dp)
-                                        .background(
-                                            brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
-                                                colors = listOf(
-                                                    parseHexColor(env.colorHex).copy(alpha = 0.3f),
-                                                    parseHexColor(env.colorHex).copy(alpha = 0.05f)
-                                                )
-                                            ),
-                                            shape = androidx.compose.foundation.shape.RoundedCornerShape(2.dp)
-                                        )
-                                ) {
+                        if (env.id != "main") {
+                            // Allocation Slider
+                            @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+                            androidx.compose.material3.Slider(
+                                value = env.percentage.toFloat(),
+                                onValueChange = { newValue ->
+                                    viewModel.updateEnvelope(env.copy(percentage = newValue.toInt()))
+                                },
+                                valueRange = 0f..100f,
+                                steps = 99,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = env.paddingLeft.dp, vertical = 0.dp)
+                                    .padding(bottom = 8.dp),
+                                thumb = {
                                     Box(
                                         modifier = Modifier
-                                            .fillMaxWidth(fraction = fraction.coerceIn(0f, 1f))
-                                            .fillMaxHeight()
-                                            .background(parseHexColor(env.colorHex), androidx.compose.foundation.shape.RoundedCornerShape(2.dp))
+                                            .size(16.dp)
+                                            .background(parseHexColor(env.colorHex), androidx.compose.foundation.shape.CircleShape)
                                     )
+                                },
+                                track = {
+                                    val fraction = env.percentage.toFloat() / 100f
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(4.dp)
+                                            .background(
+                                                brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
+                                                    colors = listOf(
+                                                        parseHexColor(env.colorHex).copy(alpha = 0.3f),
+                                                        parseHexColor(env.colorHex).copy(alpha = 0.05f)
+                                                    )
+                                                ),
+                                                shape = androidx.compose.foundation.shape.RoundedCornerShape(2.dp)
+                                            )
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth(fraction = fraction.coerceIn(0f, 1f))
+                                                .fillMaxHeight()
+                                                .background(parseHexColor(env.colorHex), androidx.compose.foundation.shape.RoundedCornerShape(2.dp))
+                                        )
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             } // closes Box(647)

@@ -1470,22 +1470,27 @@ fun EnvelopeEditorModal(
                             }
                         }
                     }
-                    Text("Allocation: ${percentage.toInt()}%", color = textColor)
-                    Slider(
-                        value = percentage,
-                        onValueChange = { percentage = it },
-                        valueRange = 0f..100f,
-                        steps = 99
-                    )
-                    val othersTotal = totalAllocatedPercentage - envelope.percentage
-                    val remaining = 100 - othersTotal - percentage.toInt()
-                    val indicatorColor = if (remaining >= 0) Color(0xFF34D399) else Color(0xFFFB7185)
-                    Text(
-                        text = if (remaining >= 0) "${othersTotal + percentage.toInt()}% used — ${remaining}% available" else "Over-allocated by ${-remaining}%",
-                        color = indicatorColor,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    if (envelope.id != "main") {
+                        Text("Allocation: ${percentage.toInt()}%", color = textColor)
+                        Slider(
+                            value = percentage,
+                            onValueChange = { percentage = it },
+                            valueRange = 0f..100f,
+                            steps = 99
+                        )
+                        val othersTotal = totalAllocatedPercentage - envelope.percentage
+                        val remaining = 100 - othersTotal - percentage.toInt()
+                        val indicatorColor = if (remaining >= 0) Color(0xFF34D399) else Color(0xFFFB7185)
+                        Text(
+                            text = if (remaining >= 0) "${othersTotal + percentage.toInt()}% used — ${remaining}% available" else "Over-allocated by ${-remaining}%",
+                            color = indicatorColor,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Allocation is managed automatically for the Main (Buffer) envelope.", color = Color(0xFF9CA3AF), fontSize = 12.sp)
+                    }
                 } else if (selectedTab == 1 || selectedTab == 2) {
                     if (!hasPremium) {
                         Surface(

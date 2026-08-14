@@ -383,48 +383,28 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateEnvelope(updated: Envelope) {
+        if (updated.id == "main") return // Main is a calculated buffer
+
         viewModelScope.launch(Dispatchers.IO) {
             markCustomized()
             val oldList = _envelopes.value
-            val oldEnv = oldList.find { it.id == updated.id } ?: return@launch
             
-            val diff = updated.percentage - oldEnv.percentage
-            var actualNewPercentage = updated.percentage
+            // Calculate sum of all other envelopes (excluding main and the one being updated)
+            val otherSum = oldList.filter { it.id != "main" && it.id != updated.id }.sumOf { it.percentage }
             
-            val newList = if (diff > 0) {
-                // User is increasing this envelope, so we must decrease others
-                var remainingToSubtract = diff
-                val mutableOthers = oldList.filter { it.id != updated.id }.map { it.copy() }.toMutableList()
-                
-                // Sort others by percentage descending so we subtract from the largest ones first
-                mutableOthers.sortByDescending { it.percentage }
-                
-                for (i in mutableOthers.indices) {
-                    if (remainingToSubtract == 0) break
-                    val other = mutableOthers[i]
-                    val canSubtract = minOf(remainingToSubtract, other.percentage)
-                    mutableOthers[i] = other.copy(percentage = other.percentage - canSubtract)
-                    remainingToSubtract -= canSubtract
+            // Cap the new percentage so it doesn't exceed 100% total
+            val cappedPercentage = minOf(updated.percentage, (100 - otherSum).coerceAtLeast(0))
+            val finalUpdated = updated.copy(percentage = cappedPercentage)
+            
+            // Main envelope takes whatever is left
+            val mainPercentage = (100 - otherSum - cappedPercentage).coerceAtLeast(0)
+            
+            val newList = oldList.map { env ->
+                when (env.id) {
+                    updated.id -> finalUpdated
+                    "main" -> env.copy(percentage = mainPercentage)
+                    else -> env
                 }
-                
-                // If we couldn't subtract all of it, clamp the new percentage
-                actualNewPercentage -= remainingToSubtract
-                
-                oldList.map { env ->
-                    if (env.id == updated.id) updated.copy(percentage = actualNewPercentage)
-                    else mutableOthers.find { it.id == env.id } ?: env
-                }
-            } else if (diff < 0) {
-                // User is decreasing this envelope, add the difference to "main" (or another if main is being decreased)
-                val targetId = if (updated.id != "main") "main" else oldList.firstOrNull { it.id != "main" }?.id ?: updated.id
-                
-                oldList.map { env ->
-                    if (env.id == updated.id) updated
-                    else if (env.id == targetId) env.copy(percentage = env.percentage + (-diff))
-                    else env
-                }
-            } else {
-                oldList.map { if (it.id == updated.id) updated else it }
             }
             
             _envelopes.value = newList
@@ -435,11 +415,22 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
     fun addEnvelope(newEnv: Envelope) {
         viewModelScope.launch(Dispatchers.IO) {
             markCustomized()
+            val currentList = _envelopes.value
+            val otherSum = currentList.filter { it.id != "main" }.sumOf { it.percentage }
+            
+            val cappedPercentage = minOf(newEnv.percentage, (100 - otherSum).coerceAtLeast(0))
+            val mainPercentage = (100 - otherSum - cappedPercentage).coerceAtLeast(0)
+            
             val envWithId = newEnv.copy(
                 id = "custom_${System.currentTimeMillis()}",
-                orderIndex = _envelopes.value.size
+                orderIndex = currentList.size,
+                percentage = cappedPercentage
             )
-            val newList = _envelopes.value + envWithId
+            
+            val newList = currentList.map { env ->
+                if (env.id == "main") env.copy(percentage = mainPercentage) else env
+            } + envWithId
+            
             _envelopes.value = newList
             saveSetting("envelopes_config", json.encodeToString(newList))
         }

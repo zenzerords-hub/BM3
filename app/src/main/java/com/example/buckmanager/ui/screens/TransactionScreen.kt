@@ -98,7 +98,7 @@ fun TransactionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(top = AppSpacing.base, bottom = 96.dp),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
