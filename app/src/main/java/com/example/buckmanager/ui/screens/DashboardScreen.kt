@@ -624,28 +624,51 @@ fun DashboardScreen(
 
             // Envelopes Header
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val defaultTextColor = if (isDarkMode) Color.White else Color(0xFF121926)
-                    val headerColor = parseHexColor(globalBg.budgetEnvelopesColorHex, parseHexColor(globalBg.textColorHex, defaultTextColor))
-                    Text(
-                        text = "Budget Envelopes",
-                        color = headerColor,
-                        fontWeight = FontWeight.Black,
-                        fontSize = 20.sp
-                    )
-                    TextButton(
-                        onClick = onAddEnvelopeClick,
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                val totalPercentage = envelopes.sumOf { it.percentage }
+                val defaultTextColor = if (isDarkMode) Color.White else Color(0xFF121926)
+                val headerColor = parseHexColor(globalBg.budgetEnvelopesColorHex, parseHexColor(globalBg.textColorHex, defaultTextColor))
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "ADD",
-                            color = Color(0xFFFCBF36),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
+                            text = "Budget Envelopes",
+                            color = headerColor,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 20.sp
+                        )
+                        TextButton(
+                            onClick = onAddEnvelopeClick,
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "ADD",
+                                color = Color(0xFFFCBF36),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                    // Total allocation indicator
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        val indicatorColor = if (totalPercentage == 100) Color(0xFF34D399) else Color(0xFFFCBF36)
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(indicatorColor)
+                        )
+                        Text(
+                            text = if (totalPercentage == 100) "100% Allocated ✓" else "${totalPercentage}% Allocated — ${100 - totalPercentage}% Unallocated",
+                            color = indicatorColor,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 11.sp
                         )
                     }
                 }
@@ -755,6 +778,7 @@ fun DashboardScreen(
                                 viewModel.updateEnvelope(env.copy(percentage = newValue.toInt()))
                             },
                             valueRange = 0f..100f,
+                            steps = 99,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = env.paddingLeft.dp, vertical = 0.dp)
@@ -931,7 +955,7 @@ fun TransactionBottomSheet(
 
             // Amount field
             Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.base)) {
-                Text("AMOUNT (RP)", color = textSecondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text("AMOUNT (${com.example.buckmanager.model.CurrencyConfig.currencyCode})", color = textSecondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 OutlinedTextField(
                     value = amountText,
                     onValueChange = { amountText = it.filter { c -> c.isDigit() } },
@@ -958,10 +982,22 @@ fun TransactionBottomSheet(
                         items(envelopes) { env ->
                             val isSelected = selectedCategory == env.id
                             val envColor = parseHexColor(env.colorHex)
+                            val envStats = viewModel.getEnvelopeStats(env.id)
                             FilterChip(
                                 selected = isSelected,
                                 onClick = { selectedCategory = env.id },
-                                label = { Text(env.name, fontWeight = FontWeight.Bold) },
+                                label = {
+                                    Column {
+                                        Text(env.name, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                        if (isSelected) {
+                                            Text(
+                                                text = "Avail: ${formatRp(envStats.remaining)}",
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        }
+                                    }
+                                },
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = envColor.copy(alpha = 0.2f),
                                     selectedLabelColor = envColor,
@@ -1005,7 +1041,7 @@ fun TransactionBottomSheet(
             Button(
                 onClick = {
                     val amt = amountText.toDoubleOrNull() ?: 0.0
-                    if (amt > 0) {
+                    if (amt > 0 && amt <= 999_999_999_999.0) {
                         val cat = if (type == "expense") selectedCategory else "income"
                         viewModel.addTransaction(type, amt, cat, descriptionText)
                         onDismiss()

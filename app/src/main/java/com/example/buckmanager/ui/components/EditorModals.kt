@@ -1275,6 +1275,7 @@ fun EnvelopeEditorModal(
     visible: Boolean,
     isDarkMode: Boolean = true,
     hasPremium: Boolean = false,
+    totalAllocatedPercentage: Int = 100,
     onDismiss: () -> Unit,
     onSave: (Envelope) -> Unit,
     onDelete: (String) -> Unit
@@ -1474,7 +1475,16 @@ fun EnvelopeEditorModal(
                         value = percentage,
                         onValueChange = { percentage = it },
                         valueRange = 0f..100f,
-                        steps = 100
+                        steps = 99
+                    )
+                    val othersTotal = totalAllocatedPercentage - envelope.percentage
+                    val remaining = 100 - othersTotal - percentage.toInt()
+                    val indicatorColor = if (remaining >= 0) Color(0xFF34D399) else Color(0xFFFB7185)
+                    Text(
+                        text = if (remaining >= 0) "${othersTotal + percentage.toInt()}% used — ${remaining}% available" else "Over-allocated by ${-remaining}%",
+                        color = indicatorColor,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 } else if (selectedTab == 1 || selectedTab == 2) {
                     if (!hasPremium) {
@@ -1730,6 +1740,7 @@ fun AddEnvelopeModal(
     visible: Boolean,
     isDarkMode: Boolean = true,
     hasPremium: Boolean = false,
+    totalAllocatedPercentage: Int = 100,
     onDismiss: () -> Unit,
     onAdd: (Envelope) -> Unit
 ) {
@@ -1888,7 +1899,15 @@ fun AddEnvelopeModal(
                         value = percentage,
                         onValueChange = { percentage = it },
                         valueRange = 0f..100f,
-                        steps = 100
+                        steps = 99
+                    )
+                    val remaining = 100 - totalAllocatedPercentage - percentage.toInt()
+                    val indicatorColor = if (remaining >= 0) Color(0xFF34D399) else Color(0xFFFB7185)
+                    Text(
+                        text = if (remaining >= 0) "${totalAllocatedPercentage + percentage.toInt()}% used — ${remaining}% available" else "Over-allocated by ${-remaining}%",
+                        color = indicatorColor,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 } else if (selectedTab == 1 || selectedTab == 2) {
                     if (!hasPremium) {

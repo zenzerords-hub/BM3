@@ -218,7 +218,7 @@ fun FundGoalEditorModal(
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Saved: Rp ${"%,d".format(currentNum.toLong()).replace(',', '.')} / Rp ${"%,d".format(targetNum.toLong()).replace(',', '.')}",
+                                text = "Saved: ${com.example.buckmanager.model.formatRp(currentNum)} / ${com.example.buckmanager.model.formatRp(targetNum)}",
                                 color = parseHexColor(labelColor, Color(0xFF9CA3AF)),
                                 fontSize = 12.sp
                             )
@@ -1551,7 +1551,7 @@ fun GoalDepositModal(
                             modifier = Modifier.clickable { amountText = preset.toLong().toString() }
                         ) {
                             Text(
-                                text = "Rp ${preset.toLong() / 1000}rb",
+                                text = "${com.example.buckmanager.model.CurrencyConfig.symbol}${preset.toLong() / 1000}rb",
                                 color = dialogTitleColor,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,

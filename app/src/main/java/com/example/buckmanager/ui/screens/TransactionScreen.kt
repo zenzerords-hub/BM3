@@ -28,12 +28,13 @@ import com.example.buckmanager.ui.components.UniversalHeader
 import com.example.buckmanager.ui.components.parseHexColor
 import com.example.buckmanager.viewmodel.BuckViewModel
 import com.example.buckmanager.model.formatRp
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun TransactionScreen(
     viewModel: BuckViewModel,
     onOpenSettings: () -> Unit,
-
     onEditFundGoal: () -> Unit
 ) {
     val globalBg by viewModel.globalBackground.collectAsState()
@@ -41,7 +42,6 @@ fun TransactionScreen(
     val currencySymbol by viewModel.currencySymbol.collectAsState()
     val isEditLocked by viewModel.isEditLocked.collectAsState()
     val envelopes by viewModel.envelopes.collectAsState()
-
 
     val isDarkMode by viewModel.isDarkMode.collectAsState()
 
@@ -54,6 +54,40 @@ fun TransactionScreen(
     val incomeColor = if (isDarkMode) Color(0xFF34D399) else Color(0xFF0E8345)
     val expenseColor = if (isDarkMode) Color(0xFFFB7185) else Color(0xFFD9254C)
     var transactionToDelete by remember { mutableStateOf<Long?>(null) }
+    var showTransactionBottomSheet by remember { mutableStateOf(false) }
+
+    // Filter state: "all", "income", "expense"
+    var filterType by remember { mutableStateOf("all") }
+
+    // Monthly summary calculation
+    val now = remember { Calendar.getInstance() }
+    val currentMonth = now.get(Calendar.MONTH)
+    val currentYear = now.get(Calendar.YEAR)
+    val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply { timeZone = TimeZone.getTimeZone("UTC") } }
+
+    val monthlyTransactions = remember(transactions, currentMonth, currentYear) {
+        transactions.filter { tx ->
+            try {
+                val txDate = dateFormat.parse(tx.date)
+                val cal = Calendar.getInstance().apply { time = txDate!! }
+                cal.get(Calendar.MONTH) == currentMonth && cal.get(Calendar.YEAR) == currentYear
+            } catch (e: Exception) { false }
+        }
+    }
+    val monthlyIncome = monthlyTransactions.filter { it.type == "income" }.sumOf { it.amount }
+    val monthlyExpense = monthlyTransactions.filter {
+        it.type == "expense" && it.category != "goal" && !(it.category == "main" && it.description.contains("Goal"))
+    }.sumOf { it.amount }
+    val monthlyNet = monthlyIncome - monthlyExpense
+
+    // Filtered transactions
+    val filteredTransactions = remember(transactions, filterType) {
+        when (filterType) {
+            "income" -> transactions.filter { it.type == "income" }
+            "expense" -> transactions.filter { it.type == "expense" }
+            else -> transactions
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -80,21 +114,117 @@ fun TransactionScreen(
                 )
             }
 
+            // Monthly Summary Card
+            item {
+                val monthName = remember(currentMonth) {
+                    SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(now.time)
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(cardBg)
+                        .padding(20.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(
+                            monthName,
+                            color = textPrimary,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 16.sp
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column {
+                                Text("Income", color = textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                                Text(
+                                    "+${formatRp(monthlyIncome)}",
+                                    color = incomeColor,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text("Expense", color = textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                                Text(
+                                    "-${formatRp(monthlyExpense)}",
+                                    color = expenseColor,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text("Net", color = textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                                Text(
+                                    "${if (monthlyNet >= 0) "+" else ""}${formatRp(monthlyNet)}",
+                                    color = if (monthlyNet >= 0) incomeColor else expenseColor,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp
+                                )
+                            }
+                        }
+                    }
+                }
+            }
 
-
+            // Filter Chips
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf("all" to "All", "income" to "Income", "expense" to "Expense").forEach { (key, label) ->
+                        val isSelected = filterType == key
+                        val chipColor = when (key) {
+                            "income" -> incomeColor
+                            "expense" -> expenseColor
+                            else -> if (isDarkMode) Color.White else Color(0xFF121926)
+                        }
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = { filterType = key },
+                            label = { Text(label, fontWeight = FontWeight.Bold, fontSize = 12.sp) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = chipColor.copy(alpha = 0.15f),
+                                selectedLabelColor = chipColor,
+                                labelColor = textSecondary
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                borderColor = inputBorder,
+                                selectedBorderColor = chipColor,
+                                enabled = true,
+                                selected = isSelected
+                            )
+                        )
+                    }
+                }
+            }
 
             // History Header
             item {
-                Text(
-                    "Transaction History",
-                    color = globalTextColor,
-                    fontWeight = FontWeight.Black,
-                    fontSize = 20.sp
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Transaction History",
+                        color = globalTextColor,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 20.sp
+                    )
+                    Text(
+                        "${filteredTransactions.size} items",
+                        color = textSecondary,
+                        fontSize = 12.sp
+                    )
+                }
             }
 
             // History List
-            if (transactions.isEmpty()) {
+            if (filteredTransactions.isEmpty()) {
                 item {
                     Box(
                         modifier = Modifier
@@ -104,11 +234,15 @@ fun TransactionScreen(
                             .padding(20.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No transactions recorded yet.", color = textSecondary, fontWeight = FontWeight.Medium)
+                        Text(
+                            if (filterType == "all") "No transactions recorded yet." else "No ${filterType} transactions found.",
+                            color = textSecondary,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             } else {
-                items(transactions) { tx ->
+                items(filteredTransactions) { tx ->
                     val env = envelopes.find { it.id == tx.category }
                     val catColor = if (tx.type == "income") incomeColor else parseHexColor(env?.colorHex ?: "#FB7185")
 
@@ -175,8 +309,21 @@ fun TransactionScreen(
                 }
             }
         }
+
+        // FAB for adding transactions
+        FloatingActionButton(
+            onClick = { showTransactionBottomSheet = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 24.dp, bottom = 100.dp),
+            containerColor = Color(0xFFFCBF36),
+            contentColor = Color.White,
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Add Transaction")
+        }
     }
-    
+
     if (transactionToDelete != null) {
         AlertDialog(
             onDismissRequest = { transactionToDelete = null },
@@ -196,6 +343,16 @@ fun TransactionScreen(
                     Text("Cancel", color = textSecondary)
                 }
             }
+        )
+    }
+
+    // Transaction Bottom Sheet (reusing the one from DashboardScreen)
+    if (showTransactionBottomSheet) {
+        TransactionBottomSheet(
+            viewModel = viewModel,
+            envelopes = envelopes,
+            isDarkMode = isDarkMode,
+            onDismiss = { showTransactionBottomSheet = false }
         )
     }
 }
