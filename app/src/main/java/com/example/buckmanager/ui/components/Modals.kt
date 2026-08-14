@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import coil.compose.AsyncImage
 import com.example.buckmanager.model.*
 import com.example.buckmanager.ui.GoldAccent
@@ -647,8 +649,6 @@ fun SettingsModal(
     onCreateSnapshot: () -> Unit = {},
     onExportJson: (android.net.Uri) -> Unit = {}
 ) {
-    if (!visible) return
-
     val context = androidx.compose.ui.platform.LocalContext.current
     val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
     var showBackupDialog by remember { mutableStateOf(false) }
@@ -669,25 +669,42 @@ fun SettingsModal(
     }
     var customizationJsonText by remember { mutableStateOf("") }
     var customizationInputText by remember { mutableStateOf("") }
-
+    
     var statusMessage by remember { mutableStateOf<String?>(null) }
 
     // Full Screen Overlay & Drawer Panel
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.65f))
-            .clickable { onDismiss() },
-        contentAlignment = Alignment.TopEnd
-    ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(0.85f)
-                .clickable(enabled = false) {}, // Prevent clicks from passing to background
-            color = if (isDarkMode) Color(0xFF110F1A) else Color(0xFFFFFFFF),
-            shape = RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp)
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(animationSpec = tween(300)),
+            exit = fadeOut(animationSpec = tween(300))
         ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.65f))
+                    .clickable { onDismiss() }
+            )
+        }
+
+        AnimatedVisibility(
+            visible = visible,
+            enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
+            exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.TopEnd
+            ) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(0.85f)
+                        .clickable(enabled = false) {}, // Prevent clicks from passing to background
+                    color = if (isDarkMode) Color(0xFF110F1A) else Color(0xFFFFFFFF),
+                    shape = RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp)
+                ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -1261,6 +1278,8 @@ fun SettingsModal(
                 }
             }
         }
+        }
+    }
     }
 
     val dialogContainer = if (isDarkMode) Color(0xFF181C26) else Color(0xFFFFFFFF)
