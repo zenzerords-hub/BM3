@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.text.SimpleDateFormat
@@ -96,7 +97,7 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
             saveSetting("edit_locked", newState.toString())
         }
     }
-    private val _isCustomizationLocked = MutableStateFlow(false)
+    private val _isCustomizationLocked = MutableStateFlow(true)
     val isCustomizationLocked: StateFlow<Boolean> = _isCustomizationLocked.asStateFlow()
 
     private val _hideBalances = MutableStateFlow(false)
@@ -202,8 +203,11 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
                 try {
                     val mon = json.decodeFromString<MonetizationState>(monStr)
                     _monetization.value = mon
-                    _isCustomizationLocked.value = false
+                    val now = System.currentTimeMillis()
+                    _isCustomizationLocked.value = !(mon.isPremium || mon.premiumExpiryDate > now || mon.adTickets > 0)
                 } catch (e: Exception) {}
+            } ?: run {
+                _isCustomizationLocked.value = true
             }
 
 
@@ -651,15 +655,23 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
                     val dateStr = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.US).format(Date())
                     saveSetting("last_backup_date", dateStr)
                     _lastBackupDate.value = dateStr
-                    onResult(true, "Data successfully backed up to Google Drive!", null)
+                    withContext(Dispatchers.Main) {
+                        onResult(true, "Data successfully backed up to Google Drive!", null)
+                    }
                 } else {
-                    onResult(false, "Failed to upload backup.", null)
+                    withContext(Dispatchers.Main) {
+                        onResult(false, "Failed to upload backup.", null)
+                    }
                 }
             } catch (e: com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException) {
-                onResult(false, "Authorization required.", e.intent)
+                withContext(Dispatchers.Main) {
+                    onResult(false, "Authorization required.", e.intent)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
-                onResult(false, "Error: ${e.message ?: "Failed to upload backup."}", null)
+                withContext(Dispatchers.Main) {
+                    onResult(false, "Error: ${e.message ?: "Failed to upload backup."}", null)
+                }
             }
         }
     }
@@ -678,21 +690,23 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
                 
                 val success = driveServiceHelper.downloadBackup(destFile)
                 if (!success) {
-                    onResult(false, "No backup found in Google Drive.", null)
+                    withContext(Dispatchers.Main) {
+                        onResult(false, "No backup found in Google Drive.", null)
+                    }
                     return@launch
                 }
 
                 val jsonString = com.example.buckmanager.utils.ZipUtils.extractBackupZip(context, destFile)
                 if (jsonString == null) {
-                    onResult(false, "Invalid or corrupt backup file.", null)
+                    withContext(Dispatchers.Main) {
+                        onResult(false, "Invalid or corrupt backup file.", null)
+                    }
                     return@launch
                 }
 
                 val payload = json.decodeFromString<BackupPayload>(jsonString)
                 
                 // Clear existing transactions
-
-
                 db.transactionDao().getAllTransactions().forEach { db.transactionDao().deleteTransaction(it.id) }
 
                 // Insert transactions
@@ -708,7 +722,6 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 }
 
-
                 // Save configurations
                 if (payload.envelopes.isNotEmpty()) {
                     saveSetting("envelopes_config", json.encodeToString(payload.envelopes))
@@ -721,12 +734,18 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 loadAllData()
-                onResult(true, "Data successfully restored from Google Drive!", null)
+                withContext(Dispatchers.Main) {
+                    onResult(true, "Data successfully restored from Google Drive!", null)
+                }
             } catch (e: com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException) {
-                onResult(false, "Authorization required.", e.intent)
+                withContext(Dispatchers.Main) {
+                    onResult(false, "Authorization required.", e.intent)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
-                onResult(false, "Error: ${e.message ?: "Invalid backup format or corrupt data."}", null)
+                withContext(Dispatchers.Main) {
+                    onResult(false, "Error: ${e.message ?: "Invalid backup format or corrupt data."}", null)
+                }
             }
         }
     }

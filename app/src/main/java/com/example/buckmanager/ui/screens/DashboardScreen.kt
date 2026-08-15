@@ -74,9 +74,10 @@ fun DashboardScreen(
 
     val hideBalances by viewModel.hideBalances.collectAsState()
 
-    val netWorth = viewModel.getNetWorth()
-    val totalIncome = viewModel.getTotalIncome()
-    val totalExpense = viewModel.getTotalExpense()
+    val transactions by viewModel.transactions.collectAsState()
+    val netWorth = remember(transactions) { viewModel.getNetWorth() }
+    val totalIncome = remember(transactions) { viewModel.getTotalIncome() }
+    val totalExpense = remember(transactions) { viewModel.getTotalExpense() }
 
     Box(
         modifier = Modifier

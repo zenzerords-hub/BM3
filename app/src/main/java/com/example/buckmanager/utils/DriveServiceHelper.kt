@@ -83,6 +83,13 @@ class DriveServiceHelper(private val driveService: Drive) {
             )
             credential.selectedAccountName = accountName
             
+            // Validate that the account is available on the device
+            if (credential.selectedAccount == null) {
+                throw IllegalStateException(
+                    "Google account '$accountName' not found on this device. Please sign out and sign in again."
+                )
+            }
+            
             val googleDriveService = Drive.Builder(
                 NetHttpTransport(),
                 GsonFactory.getDefaultInstance(),

@@ -652,6 +652,8 @@ fun SettingsModal(
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     var showCurrencyModal by remember { mutableStateOf(false) }
+    var isBackingUp by remember { mutableStateOf(false) }
+    var isRestoring by remember { mutableStateOf(false) }
 
     // Full Screen Overlay & Drawer Panel
     Box(modifier = Modifier.fillMaxSize()) {
@@ -848,8 +850,11 @@ fun SettingsModal(
                     // Backup Card
                     Surface(
                         onClick = {
+                            if (isBackingUp) return@Surface
+                            isBackingUp = true
                             android.widget.Toast.makeText(context, "Starting backup...", android.widget.Toast.LENGTH_SHORT).show()
                             onBackupData(context) { success, msg, intent ->
+                                isBackingUp = false
                                 android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_LONG).show()
                             }
                         },
@@ -882,7 +887,7 @@ fun SettingsModal(
 
                             Column {
                                 Text(
-                                    text = "Backup to Google",
+                                    text = if (isBackingUp) "Backing up..." else "Backup to Google",
                                     color = if (isDarkMode) Color.White else Color(0xFF121926),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold
@@ -899,8 +904,11 @@ fun SettingsModal(
                     // Restore Card
                     Surface(
                         onClick = {
+                            if (isRestoring) return@Surface
+                            isRestoring = true
                             android.widget.Toast.makeText(context, "Starting restore...", android.widget.Toast.LENGTH_SHORT).show()
                             onRestoreData(context) { success, msg, intent ->
+                                isRestoring = false
                                 android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_LONG).show()
                             }
                         },
@@ -933,7 +941,7 @@ fun SettingsModal(
 
                             Column {
                                 Text(
-                                    text = "Restore Backup",
+                                    text = if (isRestoring) "Restoring..." else "Restore Backup",
                                     color = if (isDarkMode) Color.White else Color(0xFF121926),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold
@@ -967,7 +975,7 @@ fun SettingsModal(
                             // Theme Row
                             val isCustomUnlocked = !isCustomizationLocked
                             
-                            if (!isCustomUnlocked || isThemeCustomized) {
+                            if (!isThemeCustomized) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
