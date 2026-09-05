@@ -31,3 +31,8 @@
 # Widgets / manifests components are kept by default; ensure provider
 -keep class com.buckmanager.app.widget.** { *; }
 -keep class com.buckmanager.app.MainActivity { *; }
+
+# Play Billing
+-keep class com.android.vending.billing.** { *; }
+-keep class com.android.billingclient.** { *; }
+

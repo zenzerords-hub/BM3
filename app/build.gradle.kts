@@ -123,6 +123,9 @@ dependencies {
 
     // Coil
     implementation(libs.coil.compose)
+
+    // Play Billing
+    implementation(libs.billing.ktx)
     
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)

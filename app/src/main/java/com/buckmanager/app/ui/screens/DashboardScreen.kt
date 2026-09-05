@@ -1,4 +1,7 @@
-package com.buckmanager.app.ui.screens
+﻿package com.buckmanager.app.ui.screens
+
+import android.app.Activity
+import androidx.compose.ui.platform.LocalContext
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -38,7 +41,6 @@ import com.buckmanager.app.ui.components.ParticleEffectCanvas
 import com.buckmanager.app.ui.components.UniversalHeader
 import com.buckmanager.app.ui.components.getIconVector
 import com.buckmanager.app.ui.components.parseHexColor
-import androidx.compose.ui.platform.LocalContext
 import com.buckmanager.app.viewmodel.BuckViewModel
 import com.buckmanager.app.widget.GoalAppWidgetProvider
 import java.text.NumberFormat
@@ -183,7 +185,7 @@ fun DashboardScreen(
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
-                                        text = if (hideBalances) currencySymbol + "••••••••" else formatRp(netWorth),
+                                        text = if (hideBalances) currencySymbol + "â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" else formatRp(netWorth),
                                         color = parseHexColor(netCard.valueColorHex, Color.White),
                                         fontWeight = FontWeight.Black,
                                         fontSize = 32.sp
@@ -304,7 +306,7 @@ fun DashboardScreen(
                                 }
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
-                                    text = if (hideBalances) "+" + currencySymbol + "•••••" else "+${formatRp(totalIncome)}",
+                                    text = if (hideBalances) "+" + currencySymbol + "â€¢â€¢â€¢â€¢â€¢" else "+${formatRp(totalIncome)}",
                                     color = parseHexColor(incCard.valueColorHex, Color(0xFF10B981)),
                                     fontWeight = FontWeight.Black,
                                     fontSize = 18.sp
@@ -396,7 +398,7 @@ fun DashboardScreen(
                                 }
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
-                                    text = if (hideBalances) "-" + currencySymbol + "•••••" else "-${formatRp(totalExpense)}",
+                                    text = if (hideBalances) "-" + currencySymbol + "â€¢â€¢â€¢â€¢â€¢" else "-${formatRp(totalExpense)}",
                                     color = parseHexColor(expCard.valueColorHex, Color(0xFFFB7185)),
                                     fontWeight = FontWeight.Black,
                                     fontSize = 18.sp
@@ -563,7 +565,7 @@ fun DashboardScreen(
                                 // Value Row
                                 Column {
                                     Text(
-                                        text = if (hideBalances) currencySymbol + "••••••" else formatRp(fundGoal.currentAmount),
+                                        text = if (hideBalances) currencySymbol + "â€¢â€¢â€¢â€¢â€¢â€¢" else formatRp(fundGoal.currentAmount),
                                         color = valueColor,
                                         fontWeight = FontWeight.Black,
                                         fontSize = 22.sp
@@ -580,7 +582,7 @@ fun DashboardScreen(
                                             fontWeight = FontWeight.Medium
                                         )
                                         Text(
-                                            text = if (remainingAmount <= 0) "🎉 Goal Reached!" else "Remaining: ${if (hideBalances) currencySymbol + "•••••" else formatRp(remainingAmount)}",
+                                            text = if (remainingAmount <= 0) "ðŸŽ‰ Goal Reached!" else "Remaining: ${if (hideBalances) currencySymbol + "â€¢â€¢â€¢â€¢â€¢" else formatRp(remainingAmount)}",
                                             color = if (remainingAmount <= 0) Color(0xFF34D399) else labelColor,
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.SemiBold
@@ -752,14 +754,14 @@ fun DashboardScreen(
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = if (hideBalances) currencySymbol + "••••••" else formatRp(stats.remaining),
+                                    text = if (hideBalances) currencySymbol + "â€¢â€¢â€¢â€¢â€¢â€¢" else formatRp(stats.remaining),
                                     color = parseHexColor(env.valueColorHex, if (isDarkMode) Color.White else Color(0xFF0F172A)),
                                     fontWeight = FontWeight.Black,
                                     fontSize = 22.sp
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = if (env.id == "savings") "Secured funds. Do not touch!" else "Remaining from ${if (hideBalances) currencySymbol + "•••••" else formatRp(stats.allocated)}",
+                                    text = if (env.id == "savings") "Secured funds. Do not touch!" else "Remaining from ${if (hideBalances) currencySymbol + "â€¢â€¢â€¢â€¢â€¢" else formatRp(stats.allocated)}",
                                     color = parseHexColor(env.descriptionColorHex, Color(0xFF9CA3AF)),
                                     fontSize = 11.sp
                                 )
@@ -853,18 +855,23 @@ fun DashboardScreen(
             }
         )
 
+        val activity = LocalContext.current as? Activity
+        val premiumPrice = viewModel.premiumFormattedPrice()
         PremiumModal(
             visible = showPremiumModal,
             isDarkMode = isDarkMode,
             monetizationState = monetization,
+            purchasePriceLabel = premiumPrice,
             onDismiss = { showPremiumModal = false },
             onWatchAd = {
                 viewModel.watchAd()
-                showPremiumModal = false
             },
             onPurchase = {
-                viewModel.purchaseLifetimePremium()
-                showPremiumModal = false
+                if (activity != null) {
+                    viewModel.purchaseLifetimePremium(activity)
+                } else {
+                    viewModel.showNotice("Unable to open Play purchase UI.")
+                }
             }
         )
 

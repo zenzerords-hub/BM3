@@ -1,6 +1,9 @@
-package com.buckmanager.app.viewmodel
+﻿package com.buckmanager.app.viewmodel
 
+import android.app.Activity
 import android.app.Application
+import com.buckmanager.app.BuildConfig
+import com.buckmanager.app.billing.BillingManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.buckmanager.app.data.AppDatabase
@@ -121,8 +124,36 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
     private val _isThemeCustomized = MutableStateFlow(false)
     val isThemeCustomized: StateFlow<Boolean> = _isThemeCustomized.asStateFlow()
 
+    private val billingManager = BillingManager(
+        context = application,
+        scope = viewModelScope,
+        onPremiumOwned = { owned ->
+            if (owned) {
+                applyLifetimePremiumFromPlay()
+            }
+        },
+        onMessage = { msg ->
+            _userNotice.value = msg
+        }
+    )
+
+    val premiumProductDetails = billingManager.productDetails
+
+    fun premiumFormattedPrice(): String? = billingManager.formattedPrice()
+
     init {
         loadAllData()
+        billingManager.start()
+    }
+
+    override fun onCleared() {
+        billingManager.end()
+        super.onCleared()
+    }
+
+    private fun applyLifetimePremiumFromPlay() {
+        updateMonetization(_monetization.value.copy(isPremium = true))
+        _isEditLocked.value = false
     }
 
     private fun defaultEnvelopes(): List<Envelope> = defaultEnvelopesLight()
@@ -562,32 +593,22 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
             updateMonetization(newMon)
             _isCustomizationLocked.value = false
             _isEditLocked.value = false
-            _userNotice.value = "✨ Customization Unlocked! Edit Mode is Active."
+            _userNotice.value = "âœ¨ Customization Unlocked! Edit Mode is Active."
         }
     }
 
     fun watchAd() {
-        val currentMon = _monetization.value
-        val newTickets = currentMon.adTickets + 1
-        if (newTickets >= 3) {
-            val oneDayMillis = 24L * 60 * 60 * 1000
-            val newMon = currentMon.copy(
-                adTickets = 0,
-                premiumExpiryDate = maxOf(System.currentTimeMillis(), currentMon.premiumExpiryDate) + oneDayMillis
-            )
-            updateMonetization(newMon)
-            _isEditLocked.value = false
-            _userNotice.value = "🎉 24-Hour Premium Unlocked! Edit Mode is Active."
-        } else {
-            updateMonetization(currentMon.copy(adTickets = newTickets))
-            _userNotice.value = "📺 Ad Watched! ($newTickets/3 tickets). Watch ${3 - newTickets} more to unlock Premium!"
-        }
+        // AdMob rewarded ads not wired yet - do not grant premium for free.
+        _userNotice.value = "Rewarded ads coming soon. Buy Lifetime Premium via Play Billing for now."
     }
 
-    fun purchaseLifetimePremium() {
-        updateMonetization(_monetization.value.copy(isPremium = true))
-        _isEditLocked.value = false
-        _userNotice.value = "🎉 Lifetime Premium Unlocked! Edit Mode is Active. Enjoy full customization!"
+    fun purchaseLifetimePremium(activity: Activity) {
+        billingManager.launchPremiumPurchase(activity)
+    }
+
+    fun restorePurchases() {
+        billingManager.refreshPurchases()
+        _userNotice.value = "Checking Play purchases..."
     }
 
 
@@ -782,3 +803,4 @@ class BuckViewModel(application: Application) : AndroidViewModel(application) {
         db.settingDao().insertSetting(SettingEntity(key, value))
     }
 }
+

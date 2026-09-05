@@ -24,6 +24,7 @@ fun PremiumModal(
     visible: Boolean,
     isDarkMode: Boolean,
     monetizationState: MonetizationState,
+    purchasePriceLabel: String? = null,
     onDismiss: () -> Unit,
     onWatchAd: () -> Unit,
     onPurchase: () -> Unit
@@ -81,7 +82,7 @@ fun PremiumModal(
                         colors = ButtonDefaults.buttonColors(containerColor = goldColor),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Buy Lifetime Premium - ${formatRp(15000.0)}", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("Buy Lifetime Premium - ${purchasePriceLabel ?: formatRp(15000.0)}", color = Color.White, fontWeight = FontWeight.Bold)
                     }
 
                     Text("OR", color = if (isDarkMode) Color(0xFF8B92A5) else Color(0xFF5A667A), fontWeight = FontWeight.Bold, fontSize = 12.sp)
