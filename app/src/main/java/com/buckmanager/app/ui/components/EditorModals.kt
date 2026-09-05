@@ -1,5 +1,6 @@
 package com.buckmanager.app.ui.components
 import com.buckmanager.app.utils.customCardStyle
+import com.buckmanager.app.utils.persistBackgroundImage
 import androidx.compose.material.icons.filled.Delete
 import com.buckmanager.app.model.Envelope
 
@@ -36,6 +37,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -198,11 +200,11 @@ fun ImageCropModal(
                                             rotation = rotationAngle
                                         )
                                         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                                            onCropConfirm(croppedUri ?: imageUri)
+                                            onCropConfirm(croppedUri ?: persistBackgroundImage(context, imageUri) ?: imageUri)
                                         }
                                     }
                                 } else {
-                                    onCropConfirm(imageUri)
+                                    onCropConfirm(persistBackgroundImage(context, imageUri) ?: imageUri)
                                 }
                             }
                         ) {
@@ -466,6 +468,7 @@ fun BackgroundEditorModal(
 ) {
     if (!visible) return
 
+    val context = LocalContext.current
     val sheetBg = if (isDarkMode) Color(0xFF0F1117) else Color(0xFFFFFFFF)
     val sheetBorder = if (isDarkMode) Color(0xFF2A273C) else Color(0xFFCBD5E1)
     val textColor = if (isDarkMode) Color.White else Color(0xFF0F172A)
@@ -500,7 +503,7 @@ fun BackgroundEditorModal(
         visible = croppingImageUri != null,
         onDismiss = { croppingImageUri = null },
         onCropConfirm = { croppedUri ->
-            bgUri = croppedUri
+            bgUri = persistBackgroundImage(context, croppedUri) ?: croppedUri
             croppingImageUri = null
         }
     )
@@ -861,6 +864,7 @@ fun HeaderCardEditorModal(
 ) {
     if (!visible || cardKey == null) return
 
+    val context = LocalContext.current
     val sheetBg = if (isDarkMode) Color(0xFF0F1117) else Color(0xFFFFFFFF)
     val sheetBorder = if (isDarkMode) Color(0xFF2A273C) else Color(0xFFCBD5E1)
     val textColor = if (isDarkMode) Color.White else Color(0xFF0F172A)
@@ -918,7 +922,7 @@ fun HeaderCardEditorModal(
         visible = croppingImageUri != null,
         onDismiss = { croppingImageUri = null },
         onCropConfirm = { croppedUri ->
-            bgUri = croppedUri
+            bgUri = persistBackgroundImage(context, croppedUri) ?: croppedUri
             croppingImageUri = null
         }
     )
@@ -1282,6 +1286,7 @@ fun EnvelopeEditorModal(
 ) {
     if (!visible || envelope == null) return
 
+    val context = LocalContext.current
     val sheetBg = if (isDarkMode) Color(0xFF0F1117) else Color(0xFFFFFFFF)
     val sheetBorder = if (isDarkMode) Color(0xFF2A273C) else Color(0xFFCBD5E1)
     val textColor = if (isDarkMode) Color.White else Color(0xFF0F172A)
@@ -1326,7 +1331,7 @@ fun EnvelopeEditorModal(
         visible = croppingImageUri != null,
         onDismiss = { croppingImageUri = null },
         onCropConfirm = { croppedUri ->
-            bgUri = croppedUri
+            bgUri = persistBackgroundImage(context, croppedUri) ?: croppedUri
             croppingImageUri = null
         }
     )
