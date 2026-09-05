@@ -8,12 +8,12 @@ plugins {
 }
 
 android {
-    namespace = "com.example.buckmanager"
+    namespace = "com.buckmanager.app"
     compileSdk = 35
     buildToolsVersion = "35.0.0"
 
     defaultConfig {
-        applicationId = "com.aistudio.buckmanager.kxmpzq"
+        applicationId = "com.buckmanager.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 2

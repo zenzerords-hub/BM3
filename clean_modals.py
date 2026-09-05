@@ -1,7 +1,7 @@
 import re
 import os
 
-path = r'app/src/main/java/com/example/buckmanager/ui/components/Modals.kt'
+path = r'app/src/main/java/com/buckmanager/app/ui/components/Modals.kt'
 with open(path, 'r', encoding='utf-8') as f:
     text = f.read()
 

@@ -24,7 +24,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.example.buckmanager.ACTION_QUICK_DEPOSIT" />
+                <action android:name="com.buckmanager.app.ACTION_QUICK_DEPOSIT" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
