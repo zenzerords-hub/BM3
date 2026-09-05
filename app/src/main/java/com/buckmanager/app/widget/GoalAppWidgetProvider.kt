@@ -18,11 +18,13 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+/**
+ * Homescreen goal progress widget (display-only).
+ * Tapping opens the app; deposits happen inside the app UI.
+ */
 class GoalAppWidgetProvider : AppWidgetProvider() {
 
     companion object {
-        const val ACTION_QUICK_DEPOSIT = "com.buckmanager.app.ACTION_QUICK_DEPOSIT"
-        const val EXTRA_DEPOSIT_AMOUNT = "extra_deposit_amount"
         const val PREFS_NAME = "buckmanager_widget_prefs"
         const val KEY_FUND_GOAL = "fund_goal_json"
 
@@ -80,15 +82,22 @@ class GoalAppWidgetProvider : AppWidgetProvider() {
             path.addRoundRect(rect, radii, android.graphics.Path.Direction.CW)
 
             val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
-            paint.color = try { android.graphics.Color.parseColor(config.backgroundColorHex) } catch(e:Exception) { android.graphics.Color.parseColor("#181C26") }
+            paint.color = try {
+                android.graphics.Color.parseColor(config.backgroundColorHex)
+            } catch (e: Exception) {
+                android.graphics.Color.parseColor("#181C26")
+            }
             paint.style = android.graphics.Paint.Style.FILL
 
             if (config.useGradient && config.gradientColors.isNotEmpty()) {
                 try {
                     val colors = config.gradientColors.map { android.graphics.Color.parseColor(it) }.toIntArray()
-                    val shader = android.graphics.LinearGradient(0f, 0f, width.toFloat(), height.toFloat(), colors, null, android.graphics.Shader.TileMode.CLAMP)
+                    val shader = android.graphics.LinearGradient(
+                        0f, 0f, width.toFloat(), height.toFloat(), colors, null, android.graphics.Shader.TileMode.CLAMP
+                    )
                     paint.shader = shader
-                } catch(e:Exception){}
+                } catch (e: Exception) {
+                }
             }
 
             canvas.drawPath(path, paint)
@@ -120,7 +129,11 @@ class GoalAppWidgetProvider : AppWidgetProvider() {
             val maxStroke = maxOf(config.borderTop, config.borderBottom, config.borderLeft, config.borderRight) * density
             if (maxStroke > 0) {
                 val strokePaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
-                strokePaint.color = try { android.graphics.Color.parseColor(config.borderColorHex) } catch(e:Exception) { android.graphics.Color.TRANSPARENT }
+                strokePaint.color = try {
+                    android.graphics.Color.parseColor(config.borderColorHex)
+                } catch (e: Exception) {
+                    android.graphics.Color.TRANSPARENT
+                }
                 strokePaint.style = android.graphics.Paint.Style.STROKE
                 strokePaint.strokeWidth = maxStroke
                 canvas.drawPath(path, strokePaint)
@@ -143,14 +156,14 @@ class GoalAppWidgetProvider : AppWidgetProvider() {
                 try {
                     val valueColor = android.graphics.Color.parseColor(fundGoal.valueColorHex)
                     val labelColor = android.graphics.Color.parseColor(fundGoal.labelColorHex)
-                    val btnTextColor = android.graphics.Color.parseColor(fundGoal.btnTextColorHex)
 
                     views.setTextColor(R.id.widget_title, valueColor)
                     views.setTextColor(R.id.widget_current_amount, valueColor)
                     views.setTextColor(R.id.widget_percentage, labelColor)
                     views.setTextColor(R.id.widget_target_amount, labelColor)
                     views.setInt(R.id.widget_title_icon, "setColorFilter", labelColor)
-                } catch (e: Exception) {}
+                } catch (e: Exception) {
+                }
 
                 val progressRatio = if (fundGoal.targetAmount > 0) {
                     (fundGoal.currentAmount / fundGoal.targetAmount).coerceIn(0.0, 1.0)
@@ -172,7 +185,7 @@ class GoalAppWidgetProvider : AppWidgetProvider() {
                 try {
                     val bitmap = generateWidgetBackground(context, fundGoal)
                     views.setImageViewBitmap(R.id.widget_bg_image, bitmap)
-                } catch(e: Exception) {
+                } catch (e: Exception) {
                     e.printStackTrace()
                 }
 
@@ -211,9 +224,5 @@ class GoalAppWidgetProvider : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
-    }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
     }
 }
