@@ -30,3 +30,7 @@ Thumbs.db
 node_modules/
 .expo/
 dist/
+
+# Release signing (local only)
+keystore.properties
+
