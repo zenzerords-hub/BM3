@@ -1,4 +1,4 @@
-﻿package com.buckmanager.app.model
+package com.buckmanager.app.model
 
 import org.junit.Assert.assertTrue
 import org.junit.Before

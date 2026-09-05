@@ -1,4 +1,4 @@
-﻿# Play Billing setup (BM3)
+# Play Billing setup (BM3)
 
 Product ID in code: `premium_lifetime` (one-time in-app product).
 

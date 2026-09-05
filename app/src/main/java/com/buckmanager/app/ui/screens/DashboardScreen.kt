@@ -1,4 +1,4 @@
-﻿package com.buckmanager.app.ui.screens
+package com.buckmanager.app.ui.screens
 
 import android.app.Activity
 import androidx.compose.ui.platform.LocalContext

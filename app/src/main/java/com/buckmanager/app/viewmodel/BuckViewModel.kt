@@ -1,4 +1,4 @@
-﻿package com.buckmanager.app.viewmodel
+package com.buckmanager.app.viewmodel
 
 import android.app.Activity
 import android.app.Application
