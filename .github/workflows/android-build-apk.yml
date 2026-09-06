@@ -15,6 +15,8 @@ jobs:
   debug:
     name: Build Debug APK
     runs-on: ubuntu-latest
+    env:
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -45,7 +47,7 @@ jobs:
           gradle-version: "9.3.1"
 
       - name: Build Debug APK
-        run: gradle assembleDebug
+        run: gradle assembleDebug --no-daemon --max-workers=2
 
       - name: Upload debug APK artifact
         uses: actions/upload-artifact@v4
@@ -57,6 +59,8 @@ jobs:
     name: Build Release APK
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && inputs.build_release
+    env:
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -85,7 +89,7 @@ jobs:
           gradle-version: "9.3.1"
 
       - name: Build Release APK
-        run: gradle assembleRelease
+        run: gradle assembleRelease --no-daemon --max-workers=2
 
       - name: Upload release APK artifact
         uses: actions/upload-artifact@v4
