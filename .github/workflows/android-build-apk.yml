@@ -47,14 +47,31 @@ jobs:
         with:
           gradle-version: "9.3.1"
 
+      # P1.10: gate APK upload on unit tests + lint. --continue so both run for clearer failure signal.
+      - name: Unit tests and lint
+        run: gradle :app:testDebugUnitTest :app:lintDebug --no-daemon --max-workers=1 --continue
+
+      - name: Upload test and lint reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-check-reports
+          path: |
+            app/build/reports/tests/testDebugUnitTest/**
+            app/build/test-results/testDebugUnitTest/**
+            app/build/reports/lint-results-debug.*
+          if-no-files-found: ignore
+
       - name: Build Debug APK
         run: gradle assembleDebug --no-daemon --max-workers=1
 
       - name: Upload debug APK artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
 
   release:
     name: Build Release APK
@@ -89,11 +106,27 @@ jobs:
         with:
           gradle-version: "9.3.1"
 
+      - name: Unit tests and lint
+        run: gradle :app:testDebugUnitTest :app:lintDebug --no-daemon --max-workers=1 --continue
+
+      - name: Upload test and lint reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-check-reports
+          path: |
+            app/build/reports/tests/testDebugUnitTest/**
+            app/build/test-results/testDebugUnitTest/**
+            app/build/reports/lint-results-debug.*
+          if-no-files-found: ignore
+
       - name: Build Release APK
         run: gradle assembleRelease --no-daemon --max-workers=1
 
       - name: Upload release APK artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
           path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
