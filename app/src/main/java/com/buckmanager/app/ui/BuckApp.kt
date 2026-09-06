@@ -108,6 +108,14 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
         val isCustomizationLocked by viewModel.isCustomizationLocked.collectAsState()
         val userNotice by viewModel.userNotice.collectAsState()
 
+
+        val view = androidx.compose.ui.platform.LocalView.current
+        androidx.compose.runtime.SideEffect {
+            val window = (view.context as android.app.Activity).window
+            val insetsController = androidx.core.view.WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = !isDarkMode
+            insetsController.isAppearanceLightNavigationBars = !isDarkMode
+        }
         var displayedNotice by remember { mutableStateOf<String?>(null) }
         var isNoticeVisible by remember { mutableStateOf(false) }
 
@@ -127,8 +135,18 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
 
 
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        val rootBg = parseHexColor(
+            globalBg.backgroundColorHex,
+            if (isDarkMode) DarkBackground else Color(0xFFF8FAFC)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(rootBg)
+        ) {
             Scaffold(
+                contentWindowInsets = WindowInsets(0, 0, 0, 0),
                 bottomBar = {
                     if (currentRoute in listOf("dashboard", "transactions")) {
                         Box(
@@ -220,6 +238,7 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                     startDestination = startDestination,
                     modifier = Modifier
                         .fillMaxSize()
+                        .statusBarsPadding()
                         .padding(paddingValues)
                 ) {
                     composable("onboarding") {
