@@ -152,7 +152,7 @@ fun LoginScreen(
                                 ?: error("Activity required for Google Sign-In")
 
                             val webClientId =
-                                "948917297322-hb3megjq0rklkftk034gnsjii6pd7il4.apps.googleusercontent.com"
+                                "11378030984-giam2jtt3ckg0n16670a1v35nm9prceb.apps.googleusercontent.com"
 
                             val signInOption = GetSignInWithGoogleOption.Builder(webClientId).build()
                             val request = GetCredentialRequest.Builder()
