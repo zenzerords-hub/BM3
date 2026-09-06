@@ -1,5 +1,9 @@
 package com.buckmanager.app.ui.screens
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,22 +14,29 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-import androidx.compose.ui.platform.LocalContext
 import androidx.credentials.CredentialManager
-import androidx.credentials.GetCredentialRequest
 import androidx.credentials.CustomCredential
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
+import com.buckmanager.app.ui.GoldAccent
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.launch
-import android.util.Log
-import com.buckmanager.app.BuildConfig
 
-import com.buckmanager.app.ui.GoldAccent
+private fun Context.findActivity(): Activity? {
+    var ctx: Context = this
+    while (ctx is ContextWrapper) {
+        if (ctx is Activity) return ctx
+        ctx = ctx.baseContext
+    }
+    return null
+}
 
 @Composable
 fun LoginScreen(
@@ -36,13 +47,13 @@ fun LoginScreen(
     val coroutineScope = rememberCoroutineScope()
     val credentialManager = remember { CredentialManager.create(context) }
     var isLoading by remember { mutableStateOf(false) }
-    
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
     val bgColor = if (isDarkMode) Color(0xFF0D0C14) else Color(0xFFF8FAFC)
     val titleColor = if (isDarkMode) Color.White else Color(0xFF0F172A)
     val subtitleColor = if (isDarkMode) Color(0xFF8B92A5) else Color(0xFF64748B)
     val btnBgColor = if (isDarkMode) Color(0xFF1E1B2E) else Color.White
     val btnTextColor = if (isDarkMode) Color.White else Color(0xFF0F172A)
-    val guestTextColor = if (isDarkMode) Color(0xFF8B92A5) else Color(0xFF64748B)
     val footerTextColor = if (isDarkMode) Color(0xFF5A5E70) else Color(0xFF94A3B8)
 
     Box(
@@ -60,7 +71,6 @@ fun LoginScreen(
         ) {
             Spacer(modifier = Modifier.weight(1f))
 
-            // Big Squircle B Logo
             Surface(
                 modifier = Modifier.size(144.dp),
                 shape = RoundedCornerShape(32.dp),
@@ -79,7 +89,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // App Name Title
             Text(
                 text = "Buck Manager",
                 color = titleColor,
@@ -89,7 +98,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Subtitle
             Text(
                 text = "SECURE. PRIVATE. ESSENTIAL.",
                 color = subtitleColor,
@@ -100,35 +108,56 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Continue with Google Button
             Surface(
                 onClick = {
                     if (isLoading) return@Surface
                     isLoading = true
+                    errorMessage = null
                     coroutineScope.launch {
                         try {
-                            val webClientId = "948917297322-hb3megjq0rklkftk034gnsjii6pd7il4.apps.googleusercontent.com"
+                            val activity = context.findActivity()
+                                ?: error("Activity required for Google Sign-In")
 
-                            val googleIdOption = GetGoogleIdOption.Builder()
-                                .setFilterByAuthorizedAccounts(false)
-                                .setServerClientId(webClientId)
-                                .setAutoSelectEnabled(true)
-                                .build()
+                            // Web OAuth client ID (not Android client ID)
+                            val webClientId =
+                                "948917297322-hb3megjq0rklkftk034gnsjii6pd7il4.apps.googleusercontent.com"
+
+                            // Button flow: GetSignInWithGoogleOption shows account UI reliably.
+                            // GetGoogleIdOption bottomsheet can hang with no UI on some devices.
+                            val signInOption = GetSignInWithGoogleOption.Builder(webClientId).build()
 
                             val request = GetCredentialRequest.Builder()
-                                .addCredentialOption(googleIdOption)
+                                .addCredentialOption(signInOption)
                                 .build()
 
-                            val result = credentialManager.getCredential(context = context, request = request)
+                            val result = credentialManager.getCredential(
+                                context = activity,
+                                request = request
+                            )
                             val credential = result.credential
 
-                            if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                                onLoginSuccess(googleIdTokenCredential.id, googleIdTokenCredential.profilePictureUri?.toString())
+                            if (credential is CustomCredential &&
+                                credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+                            ) {
+                                val googleIdTokenCredential =
+                                    GoogleIdTokenCredential.createFrom(credential.data)
+                                onLoginSuccess(
+                                    googleIdTokenCredential.id,
+                                    googleIdTokenCredential.profilePictureUri?.toString()
+                                )
+                            } else {
+                                errorMessage = "Unexpected credential type. Try again."
                             }
+                        } catch (_: GetCredentialCancellationException) {
+                            // User dismissed the account picker
+                        } catch (e: GetCredentialException) {
+                            Log.e("LoginScreen", "Google sign in failed", e)
+                            errorMessage = e.message?.takeIf { it.isNotBlank() }
+                                ?: "Google sign-in failed. Check Play services and OAuth client."
                         } catch (e: Exception) {
                             Log.e("LoginScreen", "Google sign in failed", e)
-                            // Do not auto-login on failure — user must retry or use guest mode
+                            errorMessage = e.message?.takeIf { it.isNotBlank() }
+                                ?: "Google sign-in failed"
                         } finally {
                             isLoading = false
                         }
@@ -177,9 +206,19 @@ fun LoginScreen(
                 }
             }
 
+            if (errorMessage != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = errorMessage!!,
+                    color = Color(0xFFEF4444),
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
             Spacer(modifier = Modifier.weight(1f))
 
-            // Footer note
             Text(
                 text = "Google Sign-in is required to enable secure, encrypted backups of your financial data to your personal Google Drive.",
                 color = footerTextColor,
@@ -191,4 +230,3 @@ fun LoginScreen(
         }
     }
 }
-
