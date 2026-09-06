@@ -214,11 +214,13 @@ fun BuckApp(viewModel: BuckViewModel = viewModel()) {
                     }
                 },
                 containerColor = Color.Transparent
-            ) { _ ->
+            ) { paddingValues ->
                 NavHost(
                     navController = navController,
                     startDestination = startDestination,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
                 ) {
                     composable("onboarding") {
                         OnboardingScreen(
