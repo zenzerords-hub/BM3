@@ -3,6 +3,7 @@ package com.buckmanager.app.ui.screens
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.util.Base64
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -27,7 +28,11 @@ import androidx.credentials.exceptions.GetCredentialException
 import com.buckmanager.app.ui.GoldAccent
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 private fun Context.findActivity(): Activity? {
     var ctx: Context = this
@@ -38,6 +43,33 @@ private fun Context.findActivity(): Activity? {
     return null
 }
 
+/** Prefer email from JWT claim; fall back to credential id when it looks like an email. */
+private fun resolveAccountEmail(credential: GoogleIdTokenCredential): String? {
+    val fromId = credential.id.trim()
+    if (fromId.contains("@")) return fromId
+
+    return try {
+        val parts = credential.idToken.split(".")
+        if (parts.size < 2) return fromId.ifBlank { null }
+        var payload = parts[1]
+        val pad = (4 - payload.length % 4) % 4
+        if (pad > 0) payload += "=".repeat(pad)
+        val json = String(
+            Base64.decode(payload, Base64.URL_SAFE or Base64.NO_WRAP),
+            Charsets.UTF_8
+        )
+        val email = JSONObject(json).optString("email").trim()
+        when {
+            email.contains("@") -> email
+            fromId.isNotBlank() -> fromId
+            else -> null
+        }
+    } catch (e: Exception) {
+        Log.w("LoginScreen", "Failed to parse email from idToken", e)
+        fromId.ifBlank { null }
+    }
+}
+
 @Composable
 fun LoginScreen(
     isDarkMode: Boolean,
@@ -46,6 +78,7 @@ fun LoginScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val credentialManager = remember { CredentialManager.create(context) }
+    val latestOnLoginSuccess by rememberUpdatedState(onLoginSuccess)
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -118,14 +151,10 @@ fun LoginScreen(
                             val activity = context.findActivity()
                                 ?: error("Activity required for Google Sign-In")
 
-                            // Web OAuth client ID (not Android client ID)
                             val webClientId =
                                 "948917297322-hb3megjq0rklkftk034gnsjii6pd7il4.apps.googleusercontent.com"
 
-                            // Button flow: GetSignInWithGoogleOption shows account UI reliably.
-                            // GetGoogleIdOption bottomsheet can hang with no UI on some devices.
                             val signInOption = GetSignInWithGoogleOption.Builder(webClientId).build()
-
                             val request = GetCredentialRequest.Builder()
                                 .addCredentialOption(signInOption)
                                 .build()
@@ -135,25 +164,69 @@ fun LoginScreen(
                                 request = request
                             )
                             val credential = result.credential
+                            Log.i(
+                                "LoginScreen",
+                                "credential class=${credential.javaClass.name} type=${credential.type}"
+                            )
 
-                            if (credential is CustomCredential &&
-                                credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-                            ) {
-                                val googleIdTokenCredential =
+                            val googleIdTokenCredential = when {
+                                credential is CustomCredential &&
+                                    (
+                                        credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL ||
+                                            credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_SIWG_CREDENTIAL
+                                        ) -> {
                                     GoogleIdTokenCredential.createFrom(credential.data)
-                                onLoginSuccess(
-                                    googleIdTokenCredential.id,
+                                }
+                                credential is CustomCredential -> {
+                                    // Some Play services builds still wrap SiWG as CustomCredential
+                                    // with a vendor-specific type string — try parse anyway.
+                                    try {
+                                        GoogleIdTokenCredential.createFrom(credential.data)
+                                    } catch (parse: GoogleIdTokenParsingException) {
+                                        errorMessage =
+                                            "Unexpected credential type: ${credential.type}"
+                                        Log.e("LoginScreen", "parse failed for ${credential.type}", parse)
+                                        null
+                                    }
+                                }
+                                else -> {
+                                    errorMessage =
+                                        "Unexpected credential: ${credential.javaClass.simpleName}"
+                                    null
+                                }
+                            } ?: return@launch
+
+                            val email = resolveAccountEmail(googleIdTokenCredential)
+                            if (email.isNullOrBlank()) {
+                                errorMessage =
+                                    "Google did not return an email. Check OAuth client / SHA-1."
+                                return@launch
+                            }
+
+                            Log.i("LoginScreen", "sign-in ok email=$email")
+                            withContext(Dispatchers.Main.immediate) {
+                                latestOnLoginSuccess(
+                                    email,
                                     googleIdTokenCredential.profilePictureUri?.toString()
                                 )
-                            } else {
-                                errorMessage = "Unexpected credential type. Try again."
                             }
                         } catch (_: GetCredentialCancellationException) {
-                            // User dismissed the account picker
+                            // Often fires after account pick when OAuth/SHA-1/package is wrong,
+                            // not only when the user taps back.
+                            errorMessage =
+                                "Sign-in cancelled after account pick. Usually means Android OAuth client SHA-1 / package mismatch (com.buckmanager.app)."
+                            Log.w("LoginScreen", "GetCredentialCancellationException after picker")
                         } catch (e: GetCredentialException) {
-                            Log.e("LoginScreen", "Google sign in failed", e)
-                            errorMessage = e.message?.takeIf { it.isNotBlank() }
-                                ?: "Google sign-in failed. Check Play services and OAuth client."
+                            Log.e("LoginScreen", "Google sign in failed: ${e.javaClass.simpleName}", e)
+                            errorMessage = listOfNotNull(
+                                e.javaClass.simpleName,
+                                e.message?.takeIf { it.isNotBlank() }
+                            ).joinToString(": ").ifBlank {
+                                "Google sign-in failed. Check Play services and OAuth client."
+                            }
+                        } catch (e: GoogleIdTokenParsingException) {
+                            Log.e("LoginScreen", "Invalid Google ID token", e)
+                            errorMessage = "Invalid Google ID token"
                         } catch (e: Exception) {
                             Log.e("LoginScreen", "Google sign in failed", e)
                             errorMessage = e.message?.takeIf { it.isNotBlank() }
